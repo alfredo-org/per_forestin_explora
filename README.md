@@ -1,4 +1,4 @@
-# Forestín Explora — web prototype 0.4
+# Forestín Explora — web prototype 0.5
 
 A playable third-person expedition inspired by Torres del Paine, Chile. Artistic landscape, procedural 3D character, four discoveries, camera framing and visibility checks, three unique litter pickups, a field passport, day/night lighting, local progress and touch/keyboard controls. Not an official park product or navigation map.
 
@@ -31,3 +31,9 @@ Smoother granite profiles, locally generated surface and normal textures, physic
 Photography now accepts either visible guanaco and matches the actual on-screen viewfinder. Touch controls retain at least 44-pixel targets in landscape. Existing progress is retained.
 
 This remains Babylon.js running locally in the browser, not an Unreal Engine build or an equivalent to Unreal's rendering features. Real-iPhone performance remains to be measured on the device.
+
+## Iteration 0.5 — Characters and wildlife
+
+Forestín has a separate articulated head, cheek lobes, whiskers, eyelids, a rounded backpack, uniform details and distance-driven gait with knee articulation. Guanacos have articulated necks and legs, different animation phases, grazing, alert and bounded retreat/return behavior. The supplied Forestín reference informs the green named helmet, khaki uniform, pale gloves, brown trousers, dark boots and broader face. The browser model is a simplified interpretation, not a reconstruction of the reference fur.
+
+Photography uses each animal's transformed torso anchor, including scale, and rechecks visibility at shutter time. Wildlife stays within four game units of its home and checks terrain/obstacles. Player movement cannot pass through animals. Wildlife state rules have automated tests.
