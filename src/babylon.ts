@@ -18,3 +18,6 @@ export { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 export { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData';
 export { Ray } from '@babylonjs/core/Culling/ray';
 import '@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent';
+export { PBRMaterial } from '@babylonjs/core/Materials/PBR/pbrMaterial';
+export { ImageProcessingConfiguration } from '@babylonjs/core/Materials/imageProcessingConfiguration';
+export { DefaultRenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline';

@@ -1,4 +1,4 @@
-# Forestín Explora — web prototype 0.3
+# Forestín Explora — web prototype 0.4
 
 A playable third-person expedition inspired by Torres del Paine, Chile. Artistic landscape, procedural 3D character, four discoveries, camera framing and visibility checks, three unique litter pickups, a field passport, day/night lighting, local progress and touch/keyboard controls. Not an official park product or navigation map.
 
@@ -23,3 +23,11 @@ The static `dist` build uses relative paths and can be embedded in a Capacitor i
 ## Validation
 
 Node tests check save sanitization, unique/proximity-based pickups, traversable route and photo feedback gates. The scene includes a software polygon fallback for browsers without WebGL; hardware rendering remains the default. Browser QA covers rendered controls and progression. This prototype uses an original procedural interpretation of Forestín and the park rather than the detail level of the earlier concept illustration.
+
+## Iteration 0.4 — Patagonian light
+
+Smoother granite profiles, locally generated surface and normal textures, physically based materials on hardware rendering, animated glacial water, ACES color mapping, soft PCF shadows and restrained optional bloom. The quality control switches between balanced and cinematic rendering; mobile defaults to balanced. Software rendering retains simpler materials and omits GPU postprocessing.
+
+Photography now accepts either visible guanaco and matches the actual on-screen viewfinder. Touch controls retain at least 44-pixel targets in landscape. Existing progress is retained.
+
+This remains Babylon.js running locally in the browser, not an Unreal Engine build or an equivalent to Unreal's rendering features. Real-iPhone performance remains to be measured on the device.
