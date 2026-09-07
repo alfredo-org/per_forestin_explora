@@ -1,13 +1,35 @@
 import * as B from './babylon';
+/** Tiny local sky cube gives curved helmets and eyes an actual environment reflection. */
+export function skyEnvironment(scene:B.Scene){
+ const size=32,faces:Uint8Array[]=[];
+ for(let face=0;face<6;face++){
+  const pixels=new Uint8Array(size*size*3);
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+   const u=(x+.5)/size*2-1,v=(y+.5)/size*2-1;
+   const dirs=[[1,-v,-u],[-1,-v,u],[u,1,v],[u,-1,-v],[u,-v,1],[-u,-v,-1]];
+   const d=B.Vector3.FromArray(dirs[face]).normalize(),h=Math.max(0,d.y);
+   const sky=B.Color3.Lerp(new B.Color3(.52,.62,.65),new B.Color3(.16,.35,.59),Math.sqrt(h));
+   const ground=new B.Color3(.20,.22,.12),c=d.y<0?B.Color3.Lerp(sky,ground,Math.min(1,-d.y*3)):sky;
+   const glow=Math.pow(Math.max(0,B.Vector3.Dot(d,new B.Vector3(-.6,1,-.35).normalize())),28)*.28;
+   pixels.set([Math.min(255,(c.r+glow)*255),Math.min(255,(c.g+glow*.8)*255),Math.min(255,(c.b+glow*.55)*255)],(y*size+x)*3);
+  }
+  faces.push(pixels);
+ }
+ const texture=new B.RawCubeTexture(scene,faces,size,B.Engine.TEXTUREFORMAT_RGB,B.Engine.TEXTURETYPE_UNSIGNED_BYTE,true,false);
+ texture.name='Local Patagonian sky';texture.gammaSpace=false;
+ const polynomial=new B.SphericalPolynomial();polynomial.addAmbient(new B.Color3(.20,.24,.25));polynomial.y.set(.035,.06,.10);texture.sphericalPolynomial=polynomial;
+ scene.environmentTexture=texture;scene.environmentIntensity=.55;
+}
 /** Repeatable surface detail, authored locally; no network assets at runtime. */
 export function surface(scene:B.Scene,name:string,scale:number,grain:number){
  const n=256,texture=new B.DynamicTexture(name,{width:n,height:n},scene,true),ctx=texture.getContext(),pixels=ctx.getImageData(0,0,n,n);
- const field=(x:number,y:number)=>Math.sin(x*.098+y*.147)*.3+Math.sin(x*.245-y*.098)*.2+Math.sin(x*.589+y*.442)*.13+Math.sin(x*1.571-y*1.178)*.07;
+ const rock=name.includes('granite'),cloth=name.includes('cloth'),wood=name.includes('bark');
+ const field=(x:number,y:number)=>cloth?Math.sin(x*Math.PI/2)*Math.sin(y*Math.PI/2)*.28+Math.cos(y*Math.PI)*.1:wood?Math.sin(x*.2945+Math.sin(y*.0491)*.65)*.42+Math.sin(x*.8836+y*.0245)*.18:rock?Math.sin(x*.098+y*.147)*.25+Math.sin(x*.245-y*.098)*.22-Math.pow(.5+.5*Math.sin(x*.1963+Math.sin(y*.0491)*1.3),18)*.55+Math.sin(x*1.571-y*1.178)*.13:Math.sin(x*.098+y*.147)*.3+Math.sin(x*.245-y*.098)*.2+Math.sin(x*.589+y*.442)*.13+Math.sin(x*1.571-y*1.178)*.07;
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const i=(y*n+x)*4,v=Math.round(212+field(x,y)*grain+Math.sin(x*12.9898+y*78.233)*grain*.15);pixels.data[i]=v;pixels.data[i+1]=v;pixels.data[i+2]=v;pixels.data[i+3]=255;}ctx.putImageData(pixels,0,0);texture.update();texture.uScale=scale;texture.vScale=scale;texture.anisotropicFilteringLevel=4;
  const bump=new B.DynamicTexture(name+' normals',{width:n,height:n},scene,true),bctx=bump.getContext(),normal=bctx.getImageData(0,0,n,n);for(let y=0;y<n;y++)for(let x=0;x<n;x++){const i=(y*n+x)*4,dx=field((x+1)%n,y)-field((x+n-1)%n,y),dy=field(x,(y+1)%n)-field(x,(y+n-1)%n);normal.data[i]=128-dx*45;normal.data[i+1]=128-dy*45;normal.data[i+2]=252;normal.data[i+3]=255;}bctx.putImageData(normal,0,0);bump.update();bump.uScale=scale;bump.vScale=scale;bump.level=.35;return {texture,bump};
 }
 export function cinematicPipeline(scene:B.Scene,camera:B.FreeCamera,software:boolean){
- scene.imageProcessingConfiguration.toneMappingEnabled=true;scene.imageProcessingConfiguration.toneMappingType=B.ImageProcessingConfiguration.TONEMAPPING_ACES;scene.imageProcessingConfiguration.exposure=1.12;scene.imageProcessingConfiguration.contrast=1.08;
+ scene.imageProcessingConfiguration.toneMappingEnabled=true;scene.imageProcessingConfiguration.toneMappingType=B.ImageProcessingConfiguration.TONEMAPPING_ACES;scene.imageProcessingConfiguration.exposure=1.08;scene.imageProcessingConfiguration.contrast=1.04;
  let pipeline:B.DefaultRenderingPipeline|null=null;if(!software){try{pipeline=new B.DefaultRenderingPipeline('Patagonia cinematic',true,scene,[camera]);}catch(error){console.warn('Postprocessing unavailable; keeping direct 3D rendering.',error);}}if(pipeline){pipeline.fxaaEnabled=true;pipeline.bloomThreshold=.88;pipeline.bloomWeight=.12;pipeline.bloomKernel=32;pipeline.bloomScale=.35;pipeline.samples=1;pipeline.depthOfFieldEnabled=false;}
  let quality=matchMedia('(pointer:coarse)').matches?'balanced':'cinematic';try{const saved=localStorage.getItem('forestin.quality');if(saved==='balanced'||saved==='cinematic')quality=saved;}catch{}
  function apply(){if(pipeline)pipeline.bloomEnabled=quality==='cinematic';scene.getEngine().setHardwareScalingLevel(Math.max(1,devicePixelRatio/(quality==='cinematic'?1.7:1.15)));}
@@ -15,6 +37,6 @@ export function cinematicPipeline(scene:B.Scene,camera:B.FreeCamera,software:boo
 }
 export function lakeMaterial(scene:B.Scene){
  B.Effect.ShadersStore['paineWaterVertexShader']=`precision highp float;attribute vec3 position;uniform mat4 world;uniform mat4 worldViewProjection;uniform float time;varying vec3 vWorld;void main(){vec3 p=position;p.y+=sin(p.x*.18+time*.7)*.028+sin(p.z*.23-time*.5)*.018;vWorld=(world*vec4(p,1.)).xyz;gl_Position=worldViewProjection*vec4(p,1.);}`;
- B.Effect.ShadersStore['paineWaterFragmentShader']=`precision highp float;varying vec3 vWorld;uniform vec3 cameraPosition;uniform float time;uniform float night;void main(){vec2 p=vWorld.xz;float a=sin(p.x*.8+p.y*.35+time*.9),b=cos(p.y*.7-p.x*.28-time*.65);vec3 n=normalize(vec3(a*.075,1.,b*.065));vec3 eye=normalize(cameraPosition-vWorld);float fresnel=pow(1.-max(dot(eye,n),0.),3.);vec3 water=mix(vec3(.07,.35,.38),vec3(.18,.59,.59),.5+.22*sin(p.y*.016));vec3 sky=vec3(.57,.72,.75);vec3 color=mix(water,sky,fresnel*.78);vec3 halfV=normalize(eye+normalize(vec3(-.6,1.,-.35)));float sun=pow(max(dot(n,halfV),0.),190.);color+=vec3(1.,.88,.57)*sun*.68;float fog=1.-exp(-length(cameraPosition-vWorld)*.0032);color=mix(color,vec3(.67,.76,.76),fog);color=mix(color,color*vec3(.14,.22,.36),night);gl_FragColor=vec4(color,1.);}`;
+ B.Effect.ShadersStore['paineWaterFragmentShader']=`precision highp float;varying vec3 vWorld;uniform vec3 cameraPosition;uniform float time;uniform float night;void main(){vec2 p=vWorld.xz;float a=cos(p.x*.18+time*.7)*.00504,b=cos(p.y*.23-time*.5)*.00414;float ripple=sin(p.x*2.8+p.y*1.7+time*1.5)*.023;vec3 n=normalize(vec3(-a+ripple,1.,-b+ripple*.6));float ground=3.8+sin(p.x*.065)*1.7+cos(p.y*.083)*1.05+sin(p.x*.18+p.y*.09)*.34-max(0.,p.x-2.)*.28;float depth=max(0.,.85-ground);vec3 eye=normalize(cameraPosition-vWorld);float fresnel=pow(1.-max(dot(eye,n),0.),3.);vec3 water=mix(vec3(.28,.59,.53),vec3(.055,.31,.38),1.-exp(-depth*.21));vec3 sky=vec3(.57,.72,.75);vec3 color=mix(water,sky,fresnel*.78);vec3 halfV=normalize(eye+normalize(vec3(-.6,1.,-.35)));float sun=pow(max(dot(n,halfV),0.),190.);color+=vec3(1.,.88,.57)*sun*.68;float edge=(1.-smoothstep(.04,.34,depth))*smoothstep(0.,.04,depth);color=mix(color,vec3(.78,.85,.75),edge*(.18+.12*sin(p.y*4.+time))); float fog=1.-exp(-length(cameraPosition-vWorld)*.0032);color=mix(color,vec3(.67,.76,.76),fog);color=mix(color,color*vec3(.14,.22,.36),night);gl_FragColor=vec4(color,1.);}`;
  const m=new B.ShaderMaterial('moving glacial lake',scene,{vertex:'paineWater',fragment:'paineWater'},{attributes:['position'],uniforms:['world','worldViewProjection','cameraPosition','time','night']});m.backFaceCulling=false;m.setFloat('time',0);m.setFloat('night',0);return m;
 }
