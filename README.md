@@ -22,4 +22,4 @@ The static `dist` build uses relative paths and can be embedded in a Capacitor i
 
 ## Validation
 
-Node tests check save sanitization, unique/proximity-based pickups, traversable route and photo feedback gates. Browser QA checks the actual rendered game and complete expedition. This prototype uses an original procedural interpretation of Forestín and the park rather than the detail level of the earlier concept illustration.
+Node tests check save sanitization, unique/proximity-based pickups, traversable route and photo feedback gates. The scene includes a software polygon fallback for browsers without WebGL; hardware rendering remains the default. Browser QA covers rendered controls and progression. This prototype uses an original procedural interpretation of Forestín and the park rather than the detail level of the earlier concept illustration.
