@@ -9,3 +9,13 @@
 .quest{background:rgba(20,38,35,.72);border-color:#fff3}.quest strong{font-size:17px}.quest small{font-size:11px;letter-spacing:1.3px}.quest #quest-distance{font-size:12px}.guide{font-size:14px}.round span{font-size:12px}.viewfinder span{transform:translate(-50%,-50%)}.photo-title{font-size:12px}.photo-bottom p{font-size:14px}.settings button{min-height:48px}.welcome-foot{font-size:12px}
 @media(pointer:coarse){.icon-button,.round.small,.photo-title .icon-button{min-width:44px;min-height:44px}.bottom-right{gap:15px}.photo-bottom{bottom:max(24px,env(safe-area-inset-bottom))}.quest strong{font-size:15px}.quest small{font-size:10px}.guide{font-size:13px}.photo-title{font-size:10px}.round span{font-size:11px}}
 @media(max-height:550px) and (orientation:landscape){.photo-bottom{right:max(35px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom))}.quest{max-width:315px}.quest strong{font-size:14px}.photo-title{top:max(12px,env(safe-area-inset-top))}.round.small{width:44px;height:44px}}
+
+/* Mobile GPU composition and safe areas. */
+@media(pointer:coarse){
+ html,body,#app{height:100dvh;overscroll-behavior:none}
+ .quest,.guide,.round,#joystick{backdrop-filter:none;-webkit-backdrop-filter:none}
+ .quest,.guide,.round{background:rgba(24,43,38,.92)}
+ #joystick{bottom:max(43px,calc(env(safe-area-inset-bottom) + 15px))}
+ .bottom-right{bottom:max(58px,calc(env(safe-area-inset-bottom) + 25px))}
+ dialog::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none;background:#142b298c}
+}

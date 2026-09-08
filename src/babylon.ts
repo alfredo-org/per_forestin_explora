@@ -25,3 +25,5 @@ import '@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent';
 export { PBRMaterial } from '@babylonjs/core/Materials/PBR/pbrMaterial';
 export { ImageProcessingConfiguration } from '@babylonjs/core/Materials/imageProcessingConfiguration';
 export { DefaultRenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline';
+
+export type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';

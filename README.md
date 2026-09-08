@@ -1,4 +1,4 @@
-# Forestín Explora — web prototype 0.6
+# Forestín Explora — web prototype 0.7
 
 A playable third-person expedition inspired by Torres del Paine, Chile. Artistic landscape, procedural 3D character, four discoveries, camera framing and visibility checks, three unique litter pickups, a field passport, day/night lighting, local progress and touch/keyboard controls. Not an official park product or navigation map.
 
@@ -48,3 +48,14 @@ Hardware rendering adds a small locally generated sky reflection cube, restraine
 The CPU fallback now uses per-pixel reciprocal-depth testing, near-plane clipping and interpolated shading, eliminating lake/ground ordering artifacts. It caps resolution at 720 pixels wide and 480,000 total pixels. All visual distribution uses separate deterministic seeds, keeping existing obstacles and route logic intact. Saved progress and gameplay rules are unchanged.
 
 Validation: six gameplay tests and TypeScript/production build; full-scene headless CPU rendering checked for valid geometry and wildlife anchors; isolated renderer tests checked draw-order independence, crossing triangles and near-plane clipping. Hardware rendering and real-iPhone frame rate still require device validation.
+
+
+## Iteration 0.7 — Mobile rendering and living landscape
+
+Touch devices now build a dedicated geometry profile: reduced terrain/rock/crown tessellation, grass and fur counts; 512-pixel shadows with fewer casters; no HDR postprocess, MSAA or persistent drawing buffer. The default mobile target is 30 render frames per second, not a guaranteed device measurement. The mobile quality control switches between fluency and detail; its preference is independent of desktop. Rendering uses inverse pixel density correctly, with an adaptive resolution controller and pixel budgets, including rotation.
+
+Headless geometry construction measured 214,855 triangles on the mobile profile versus 622,367 on the desktop profile (65.5% fewer), and 46 versus 140 shadow casters. Both profiles keep the same 43 blocking obstacles. These numbers describe scene complexity, not measured FPS. Desktop has smoother character surfaces, additional fur, 1536-pixel shadows and retained cinematic processing. Both hardware profiles add shader-driven wind in grass, drifting clouds and nose surface relief.
+
+HUD and photography feedback update about eight times per second; the shutter still validates the exact current frame. Mobile camera obstruction checks update at ten Hz. Static world matrices are frozen. Hidden pages stop rendering, dialogs pause it, WebGL context loss preserves progress, and touch pointers retain their own ownership. Mobile controls use safe areas and avoid costly backdrop blur.
+
+Validation: eight tests (including pixel budgets and adaptive resolution), production TypeScript/Vite build, CPU scene rendering, finite wildlife anchors and mobile/desktop obstacle comparison. GPU shaders, WebGL photo export, context restoration, actual touch interaction and thermal performance require testing on a real iPhone; they were not measured by the headless checks.
