@@ -1,4 +1,4 @@
-# Forestín Explora — web prototype 0.7
+# Forestín Explora — web prototype 0.8
 
 A playable third-person expedition inspired by Torres del Paine, Chile. Artistic landscape, procedural 3D character, four discoveries, camera framing and visibility checks, three unique litter pickups, a field passport, day/night lighting, local progress and touch/keyboard controls. Not an official park product or navigation map.
 
@@ -59,3 +59,16 @@ Headless geometry construction measured 214,855 triangles on the mobile profile 
 HUD and photography feedback update about eight times per second; the shutter still validates the exact current frame. Mobile camera obstruction checks update at ten Hz. Static world matrices are frozen. Hidden pages stop rendering, dialogs pause it, WebGL context loss preserves progress, and touch pointers retain their own ownership. Mobile controls use safe areas and avoid costly backdrop blur.
 
 Validation: eight tests (including pixel budgets and adaptive resolution), production TypeScript/Vite build, CPU scene rendering, finite wildlife anchors and mobile/desktop obstacle comparison. GPU shaders, WebGL photo export, context restoration, actual touch interaction and thermal performance require testing on a real iPhone; they were not measured by the headless checks.
+
+
+## Iteration 0.8 — Desktop visual finish
+
+Desktop-only additions: curved combed fur ribbons on Forestin and guanacos, uniform topstitching, restrained fabric sheen and helmet clearcoat; clustered tussocks with narrow seed heads, low cushion plants and glacial gravel. These add 40,237 triangles in eleven opaque batches, for 662,604 desktop triangles total. They are decorative, use independent seeds and follow existing character rigs. The mobile profile remains at 214,855 triangles and contains none of these additional batches. Both retain the same 43 obstacles and transformed animal photo anchors.
+
+Desktop surface maps use 512-pixel detail and a 128-pixel sky cube. Supported desktop hardware adds half-resolution SSAO2 contact occlusion, conservative sharpen and a scenery-only planar lake reflection (768 square pixels). SSAO attaches before final color/AA processing and uses a geometry buffer to coexist with custom grass/water shaders. The reflected camera matrix is copied at RTT rendering; mobile water does not compile a reflection sampler. Balanced quality removes both contact occlusion and the reflection render target.
+
+Desktop quality cycles Balanced / Cinematic / Ultra. New desktop preferences default to Ultra; existing choices are honored. Ultra allows up to 6.2 million output pixels, MSAA up to four samples according to support, 16 AO samples and reflection each frame; Cinematic uses 8 AO samples and reflection every second frame. Adaptive pixel density remains available, including DPR1 monitors. This is a quality preset, not a promise of fixed FPS on all PCs.
+
+Validation: eleven Node tests and TypeScript/Vite build. Headless geometry construction checked all positions, eleven desktop-only batches, identical collision placement/animal anchors, and unchanged mobile triangle count. No browser GPU was available in this run; visual correctness and speed of SSAO, planar reflection and hardware antialiasing still need a real-PC review. Software fallback cannot validate these effects. The assets remain a procedural stylized interpretation of the supplied character reference.
+
+Desktop feel is also refined: a closer shoulder camera with frame-rate independent orbit easing, progressive manual acceleration/braking and a narrower field of view. Guided-route logic is preserved. Two additional tests check angle wrapping and matching motion at 30/60 FPS.
