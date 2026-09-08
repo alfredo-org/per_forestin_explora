@@ -8,7 +8,7 @@ export function lakeReflection(scene:B.Scene,water:B.ShaderMaterial){
   mirror=new B.MirrorTexture('Paine landscape in the lake',768,scene,false,B.Engine.TEXTURETYPE_UNSIGNED_BYTE);
   mirror.mirrorPlane=new B.Plane(0,-1,0,.85);mirror.refreshRate=2;
   mirror.useCameraPostProcesses=false;mirror.renderParticles=false;mirror.disableImageProcessing=true;mirror.gammaSpace=false;
-  mirror.renderList=scene.meshes.filter(m=>m.name==='sky'||!!m.metadata?.occluder);
+  mirror.renderList=scene.meshes.filter(m=>m.name==='sky'||!!m.metadata?.occluder||!!m.metadata?.backdrop);
   mirror.onBeforeRenderObservable.add(()=>water.setMatrix('reflectionViewProjection',scene.getTransformMatrix().clone()));
   water.setTexture('reflectionSampler',mirror);
  }catch(error){mirror?.dispose();mirror=null;console.warn('Lake reflection unavailable; keeping analytical water.',error);}

@@ -72,3 +72,12 @@ Desktop quality cycles Balanced / Cinematic / Ultra. New desktop preferences def
 Validation: eleven Node tests and TypeScript/Vite build. Headless geometry construction checked all positions, eleven desktop-only batches, identical collision placement/animal anchors, and unchanged mobile triangle count. No browser GPU was available in this run; visual correctness and speed of SSAO, planar reflection and hardware antialiasing still need a real-PC review. Software fallback cannot validate these effects. The assets remain a procedural stylized interpretation of the supplied character reference.
 
 Desktop feel is also refined: a closer shoulder camera with frame-rate independent orbit easing, progressive manual acceleration/braking and a narrower field of view. Guided-route logic is preserved. Two additional tests check angle wrapping and matching motion at 30/60 FPS.
+
+
+### 0.9 · Torres ilustradas en PC
+
+El fondo distante ahora usa `public/assets/torres-paine-v1.png`, una ilustración original generada con la herramienta integrada imagegen. Prompt: tres torres de granito reconocibles desde Base Torres, torre central más alta, fisuras detalladas, nieve en quebradas, iluminación de tarde desde arriba a la izquierda, aspecto de aventura 3D, formato 3:2 y silueta transparente sin cielo, lago ni personajes.
+
+Un plano fijo de 270 × 180 unidades sustituye las montañas centrales solo después de cargar la textura. El terreno, los personajes y las cordilleras laterales conservan geometría real. Recibe bruma, cambia de luminosidad de noche y entra en el reflejo del lago. El recorte alfa escribe profundidad. Un error de descarga conserva las montañas originales; móvil y renderizador de software conservan la versión anterior. No se modifica la secuencia aleatoria de posiciones ni las misiones.
+
+Validación: compilación TypeScript/Vite y 11 pruebas de lógica. La composición final y el rendimiento del fondo requieren revisión en una GPU real.

@@ -31,3 +31,5 @@ export { ImageProcessingConfiguration } from '@babylonjs/core/Materials/imagePro
 export { DefaultRenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline';
 
 export type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
+
+export { Texture } from '@babylonjs/core/Materials/Textures/texture';

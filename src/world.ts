@@ -1,3 +1,4 @@
+import {mountainBackdrop} from './mountain-backdrop';
 import {lakeReflection} from './desktop-light';
 import {desktopCharacterFinish} from './character-finish';
 import {groundDetail} from './ground-detail';
@@ -66,6 +67,7 @@ export function makeWorld(canvas:HTMLCanvasElement){
  for(let i=0;i<13;i++)peak('distant Andes',-260+i*43,-250-rand()*60,35+rand()*51,35+rand()*21,i+10);
  peak('western massif',-112,-235,62,61,3);peak('eastern massif',100,-265,63,75,7);peak('granite base',-5,-278,51,72,2);
  peak('Torre Sur',-32,-275,85,17,3);peak('Torre Central',-7,-278,102,19,5);peak('Torre Norte',20,-279,80,16,8);
+ const backdrop=!mobile&&!software?mountainBackdrop(scene):null;
  const waterMat=mat('glacial turquoise','#448f99');waterMat.specularColor=new B.Color3(.9,.9,.7);waterMat.specularPower=140;waterMat.alpha=1;const water=B.MeshBuilder.CreateGround('lake',{width:420,height:400,subdivisions:18},scene);water.position.set(128,.85,-100);water.material=waterMat;water.isPickable=false;
  const animatedWater=software?null:lakeMaterial(scene,!mobile);if(animatedWater)water.material=animatedWater;
  const buckets=new Map<B.Material,B.Mesh[]>();function batch(m:B.Mesh){if(!m.material)return;if(!m.isVerticesDataPresent('color'))m.setVerticesData('color',new Float32Array(m.getTotalVertices()*4).fill(1));const list=buckets.get(m.material)??[];list.push(m);buckets.set(m.material,list);}
@@ -95,7 +97,7 @@ export function makeWorld(canvas:HTMLCanvasElement){
  const markers=discoveries.map(d=>{const ring=B.MeshBuilder.CreateTorus('discovery ring',{diameter:2.5,thickness:.045,tessellation:36},scene);ring.position.set(d.x,height(d.x,d.z)+.1,d.z);const m=mat('waypoint glow','#f2cd78');m.emissiveColor=B.Color3.FromHexString('#b59c60');ring.material=m;ring.isPickable=false;return ring;});
  const bird=new B.TransformNode('condor',scene);ell('condor body',[0,0,0],[.35,.3,1.1],mats.nose,bird);const wing1=ell('left wing',[-.85,0,0],[1.8,.07,.65],mats.nose,bird),wing2=ell('right wing',[.85,0,0],[1.8,.07,.65],mats.nose,bird);bird.getChildMeshes().forEach(m=>m.isPickable=false);
  let isNight=false;
- function night(value:boolean){isNight=value;scene.environmentIntensity=value?.09:.55;hemi.intensity=value?.38:.66;sun.intensity=value?.38:1.45;sun.diffuse=value?new B.Color3(.56,.67,1):new B.Color3(1,.88,.65);scene.fogColor=value?new B.Color3(.06,.095,.15):new B.Color3(.65,.77,.79);skyMat.setFloat('night',value?1:0);}
+ function night(value:boolean){isNight=value;backdrop?.night(value);scene.environmentIntensity=value?.09:.55;hemi.intensity=value?.38:.66;sun.intensity=value?.38:1.45;sun.diffuse=value?new B.Color3(.56,.67,1):new B.Color3(1,.88,.65);scene.fogColor=value?new B.Color3(.06,.095,.15):new B.Color3(.65,.77,.79);skyMat.setFloat('night',value?1:0);}
  let gaitPhase=0,walkBlend=0;let lastPlayer:Point|null=null;
  function animate(time:number,_speed:number,dt:number){skyMat.setFloat('time',time);if(windyGrass){windyGrass.setFloat('time',time);windyGrass.setFloat('night',isNight?1:0);windyGrass.setVector3('cameraPosition',camera.position);}if(animatedWater){animatedWater.setFloat('time',time);animatedWater.setFloat('night',isNight?1:0);animatedWater.setVector3('cameraPosition',camera.position);}const p={x:player.position.x,z:player.position.z};const moved=lastPlayer?Math.min(.6,distance(p,lastPlayer)):0;lastPlayer=p;gaitPhase+=moved*2.5;walkBlend+=(moved>.002?1-walkBlend:-walkBlend)*Math.min(1,dt*9);const walk=Math.sin(gaitPhase)*walkBlend;
  legs[0].rotation.x=walk*.5;legs[1].rotation.x=-walk*.5;knees[0].rotation.x=-Math.max(0,-walk)*.48;knees[1].rotation.x=-Math.max(0,walk)*.48;arms[0].rotation.x=-walk*.4;arms[1].rotation.x=walk*.4;body.position.y=Math.abs(Math.sin(gaitPhase))*walkBlend*.03+Math.sin(time*1.8)*.009;body.rotation.z=walk*.018;headRig.rotation.y=Math.sin(time*.55)*.075*(1-walkBlend);headRig.rotation.x=Math.sin(gaitPhase)*walkBlend*.025;const blink=time%5.7;lids.forEach(l=>l.scaling.y=blink<.15?.19:.015);
