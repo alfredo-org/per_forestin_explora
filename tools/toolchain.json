@@ -1,0 +1,27 @@
+{
+  "godot": "4.5.1",
+  "godot_release": "4.5.1-stable",
+  "blender_series": "4.5",
+  "python_minimum": "3.10",
+  "downloads": {
+    "linux": {
+      "file": "Godot_v4.5.1-stable_linux.x86_64.zip",
+      "sha256": "02ec53d1cc7dbb9cc6355393c61b9ab43d1244751a124f10248a4802830788cd"
+    },
+    "windows": {
+      "file": "Godot_v4.5.1-stable_win64.exe.zip",
+      "sha256": "defccc78669e644861b4247626b01ae362cd9f23975edf19c8bfd2eb1f6a1783"
+    },
+    "darwin": {
+      "file": "Godot_v4.5.1-stable_macos.universal.zip",
+      "sha256": "65c27959d02aaacfc131ec7ecb90179ba8045200cb02982bf2be96d117010b8a"
+    },
+    "templates": {
+      "file": "Godot_v4.5.1-stable_export_templates.tpz",
+      "sha256": "1998af37f1387684e2c211cdb483daf492fc64dc6b12096bddcdca25b6910c86"
+    }
+  },
+  "source": "https://api.github.com/repos/godotengine/godot/releases/tags/4.5.1-stable",
+  "blender_version": "4.5.13",
+  "blender_linux_sha256": "da4e69b06b75b9e642d106496c50e7e240218b411d2f6e18271c1d1d819cef91"
+}

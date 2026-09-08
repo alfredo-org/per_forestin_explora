@@ -1,3 +1,15 @@
 node_modules/
 dist/
 .DS_Store
+
+# Native toolchain, generated imports, builds and local signing
+.tools/
+**/.godot/
+builds/
+__pycache__/
+*.pyc
+*.blend1
+*.blend2
+*.p12
+*.mobileprovision
+.env

@@ -1,0 +1,24 @@
+; Forestín Aventura — native infrastructure baseline. Godot 4.5.1 stable.
+config_version=5
+
+[application]
+config/name="Forestín Aventura"
+config/version="0.0.1-phase0"
+run/main_scene="res://scenes/bootstrap.tscn"
+config/features=PackedStringArray("4.5", "GL Compatibility")
+
+[autoload]
+InputBindings="*res://core/input_bindings.gd"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.10, 0.16, 0.21, 1)
+
+[forestin]
+quality/default="HIGH"

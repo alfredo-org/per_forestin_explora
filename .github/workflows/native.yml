@@ -1,0 +1,69 @@
+name: Forestin native validation and Windows build
+on:
+  push:
+    branches: [main]
+    paths: ['game/**', 'blender/**', 'tools/**', 'tests/**', '.github/workflows/native.yml']
+  pull_request:
+    paths: ['game/**', 'blender/**', 'tools/**', 'tests/**', '.github/workflows/native.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python tooling tests
+        run: python -m unittest discover -s tests -v
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .tools
+            ~/.local/share/godot/export_templates/4.5.1.stable
+          key: godot-linux-${{ hashFiles('tools/toolchain.json') }}
+      - name: Install pinned official Godot and Windows templates
+        run: python tools/setup_godot.py --windows-templates
+      - name: Import, smoke test and export Windows
+        run: python tools/native.py export-windows
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-validation-${{ github.sha }}
+          path: builds/reports/
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        with:
+          name: forestin-aventura-windows-${{ github.sha }}
+          path: builds/windows/
+          if-no-files-found: error
+  blender-pipeline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Godot for GLB validation
+        run: python tools/setup_godot.py
+      - name: Install Blender 4.5.13 LTS
+        shell: bash
+        run: |
+          curl -fL --retry 2 --max-time 300 -o /tmp/blender.tar.xz https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz
+          echo "da4e69b06b75b9e642d106496c50e7e240218b411d2f6e18271c1d1d819cef91  /tmp/blender.tar.xz" | sha256sum --check
+          tar -xJf /tmp/blender.tar.xz -C .tools
+      - name: Validate source preservation, GLB export and Godot import
+        run: python tools/validate_blender.py --blender .tools/blender-4.5.13-linux-x64/blender
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blender-validation-${{ github.sha }}
+          path: builds/reports/
+          if-no-files-found: warn

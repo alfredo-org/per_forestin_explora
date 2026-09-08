@@ -1,3 +1,16 @@
+# Forestín Aventura — fase 0 nativa
+
+Se incorpora `game/project.godot` (Godot 4.5.1) y el pipeline Blender 4.5 LTS para comenzar la versión instalable. El prototipo web existente se conserva como referencia jugable.
+
+- [Abrir y validar el proyecto en Windows/Mac](docs/PIPELINE.md)
+- [Inventario y reutilización](docs/INVENTORY.md)
+- [Arquitectura](docs/ARCHITECTURE.md) y [backlog](docs/BACKLOG.md)
+- [Resultados de fase 0](docs/PHASE0_RESULT.md)
+
+La escena nativa actual prueba infraestructura; el personaje, locomoción, fauna y misión se incorporan en fase 1. La calidad artística final e iOS físico siguen pendientes.
+
+---
+
 # Forestín Explora — web prototype 0.8
 
 A playable third-person expedition inspired by Torres del Paine, Chile. Artistic landscape, procedural 3D character, four discoveries, camera framing and visibility checks, three unique litter pickups, a field passport, day/night lighting, local progress and touch/keyboard controls. Not an official park product or navigation map.
