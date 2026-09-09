@@ -2,7 +2,7 @@ extends CharacterBody3D
 const Shapes = preload("res://adventure/shapes.gd")
 var active := false
 var yaw := 0.0
-var pitch := -0.23
+var pitch := -0.15
 var visual: Node3D
 var pivot: Node3D
 var arm: SpringArm3D

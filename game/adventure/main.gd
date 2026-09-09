@@ -84,6 +84,7 @@ func make_ui()->void:
 	label(content,"CUADERNO DE CAMPO",12,Color("d6bc86"));objective=label(content,"",21);detail=label(content,"",15);distance_label=label(content,"",13,Color("d6bc86"))
 	hint=label(hud,"",21);hint.position=Vector2(250,618);hint.size.x=780;hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_color_override("font_shadow_color",Color.BLACK);hint.add_theme_constant_override("shadow_offset_x",2);hint.add_theme_constant_override("shadow_offset_y",2)
+	var control_bg:=ColorRect.new();control_bg.color=Color(0.02,0.055,0.04,0.86);control_bg.position=Vector2(0,666);control_bg.size=Vector2(1280,54);control_bg.mouse_filter=Control.MOUSE_FILTER_IGNORE;hud.add_child(control_bg)
 	var controls:=label(hud,"WASD  Mover    Mouse  Mirar    Shift  Correr    Espacio  Saltar    E  Interactuar    Esc  Pausa",14);controls.position=Vector2(26,680)
 	toast_label=label(hud,"",19,Color("f0d291"));toast_label.position=Vector2(440,26);toast_label.size.x=790;toast_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	pause_ui=screen(canvas);darken(pause_ui,0.78);pause_ui.hide()

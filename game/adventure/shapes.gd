@@ -60,7 +60,7 @@ static func forestin() -> Node3D:
 	box(root,Vector3(0,0.81,-0.27),Vector3(0.08,0.07,0.025),cream)
 	for side in [-1,1]:
 		var leg := pivot(root,Vector3(side*0.15,0.74,0),"LegL" if side<0 else "LegR")
-		capsule(leg,Vector3(0,-0.23,0),0.12,0.48,boots)
+		capsule(leg,Vector3(0,-0.31,0),0.12,0.68,boots)
 		ellipsoid(leg,Vector3(0,-0.61,-0.055),Vector3(0.26,0.23,0.43),boots)
 		var arm := pivot(root,Vector3(side*0.32,1.19,0),"ArmL" if side<0 else "ArmR")
 		capsule(arm,Vector3(side*0.035,-0.19,0),0.105,0.43,khaki)

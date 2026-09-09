@@ -21,3 +21,7 @@ Capturas reales preparadas en `capture_adventure.gd` para CI con Xvfb/OpenGL por
 ## Mayor brecha y siguiente iteración
 
 La identidad visual todavía depende de geometría simplificada. Priorizar personaje y guanaco elaborados en Blender, rig y animaciones de calidad, integración del fondo con relieve medio 3D y una revisión visual del recorrido en PC. Validar a mano duración, legibilidad del sendero, cámara, audio y fauna antes de ampliar contenido. No es una versión comercial terminada.
+
+## Revisión de capturas del runner
+
+El run 34372992517 generó imágenes reales a 1280×720. La inspección detectó sobreexposición diurna, bajo contraste de los controles inferiores, recorte de las cumbres y separación visible entre pantalones y botas. Se redujo la energía solar/ambiente, se añadió fondo al control inferior, se ajustó el encuadre y se alargaron las piernas. Estas correcciones requieren comparar las nuevas capturas; no acreditan todavía calidad artística final.

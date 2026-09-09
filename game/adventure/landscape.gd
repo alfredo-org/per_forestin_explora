@@ -31,14 +31,14 @@ func _ready()->void:
 	add_child(terrain);terrain.create_trimesh_collision()
 	var sky:=ProceduralSkyMaterial.new();sky.sky_top_color=Color("638f9f");sky.sky_horizon_color=Color("d2d1bb");sky.ground_horizon_color=Color("c9c7ad");sky.ground_bottom_color=Color("5c6654")
 	environment=Environment.new();environment.background_mode=Environment.BG_SKY;environment.sky=Sky.new();environment.sky.sky_material=sky
-	environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;environment.ambient_light_color=Color("c5dbda");environment.ambient_light_energy=0.65
+	environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;environment.ambient_light_color=Color("c5dbda");environment.ambient_light_energy=0.30
 	environment.tonemap_mode=Environment.TONE_MAPPER_FILMIC;environment.fog_enabled=true;environment.fog_density=0.0018;environment.fog_light_color=Color("b3c6c7")
 	var world_env:=WorldEnvironment.new();world_env.environment=environment;add_child(world_env)
-	sun=DirectionalLight3D.new();sun.name="Sun";sun.rotation_degrees=Vector3(-38,-32,0);sun.light_color=Color("ffdfab");sun.light_energy=1.7;sun.shadow_enabled=true;sun.directional_shadow_max_distance=70;add_child(sun)
+	sun=DirectionalLight3D.new();sun.name="Sun";sun.rotation_degrees=Vector3(-38,-32,0);sun.light_color=Color("fff0d7");sun.light_energy=0.70;sun.shadow_enabled=true;sun.directional_shadow_max_distance=70;add_child(sun)
 	var water:=MeshInstance3D.new();var plane:=PlaneMesh.new();plane.size=Vector2(50,140);water.mesh=plane;water.position=Vector3(38,-0.25,-40)
 	var shader:=Shader.new();shader.code="shader_type spatial; render_mode cull_disabled; void fragment(){ vec2 q=UV*90.; float w=sin(q.x+TIME*.7)*sin(q.y*.7+TIME*.4); ALBEDO=mix(vec3(.035,.24,.25),vec3(.14,.46,.44),.5+w*.18); ROUGHNESS=.25; METALLIC=.25; NORMAL=normalize(vec3(w*.07,.04*cos(q.x+TIME),1.)); }"
 	var wm:=ShaderMaterial.new();wm.shader=shader;water.material_override=wm;add_child(water)
-	var backdrop:=MeshInstance3D.new();var quad:=QuadMesh.new();quad.size=Vector2(200,133);backdrop.mesh=quad;backdrop.position=Vector3(-2,47,-139)
+	var backdrop:=MeshInstance3D.new();var quad:=QuadMesh.new();quad.size=Vector2(140,93);backdrop.mesh=quad;backdrop.position=Vector3(-2,27,-170)
 	var bm:=Shapes.material(Color.WHITE);bm.albedo_texture=load("res://assets/environment/torres.png");bm.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR;bm.alpha_scissor_threshold=0.08;bm.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;bm.cull_mode=BaseMaterial3D.CULL_DISABLED;backdrop_material=bm;backdrop.material_override=bm;backdrop.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;add_child(backdrop)
 	var rng:=RandomNumberGenerator.new();rng.seed=381
 	var rockmat:=Shapes.material(Color("858b80"))
@@ -74,8 +74,8 @@ func set_night(value:bool)->void:
 	night=value
 	backdrop_material.albedo_color=Color("435978") if value else Color.WHITE
 	environment.fog_light_color=Color("243247") if value else Color("b3c6c7")
-	sun.light_energy=0.20 if value else 1.7;sun.light_color=Color("b1c5ef") if value else Color("ffdfab")
-	environment.ambient_light_energy=0.24 if value else 0.65
+	sun.light_energy=0.20 if value else 0.70;sun.light_color=Color("b1c5ef") if value else Color("fff0d7")
+	environment.ambient_light_energy=0.24 if value else 0.30
 	var sky:ProceduralSkyMaterial=environment.sky.sky_material
 	sky.sky_top_color=Color("09172e") if value else Color("638f9f");sky.sky_horizon_color=Color("31455e") if value else Color("d2d1bb")
 
