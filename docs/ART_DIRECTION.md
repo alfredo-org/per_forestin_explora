@@ -19,3 +19,7 @@ QA manual: rostro en primer plano, silueta lateral/trasera, manos/pies en intera
 ## Estado 0.1.0
 
 Personaje y fauna procedurales provisionales, fondo Torres reutilizado del prototipo y geometría de primer plano. Pendientes modelos Blender y validación perceptual de calidad final.
+
+## Iteración 0.1.1
+
+Ver [cambios del paisaje y personajes](VISUAL_0_1_1.md). Se reemplazan copas esféricas por hojas instanciadas y se introduce detalle de suelo, rocas y fibras. Los assets finales Blender y QA artístico siguen pendientes.

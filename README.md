@@ -1,4 +1,4 @@
-# Forestín Aventura — prototipo nativo 0.1.0
+# Forestín Aventura — prototipo nativo 0.1.1
 
 Se incorpora `game/project.godot` (Godot 4.5.1) y el pipeline Blender 4.5 LTS para comenzar la versión instalable. El prototipo web existente se conserva como referencia jugable.
 
@@ -8,6 +8,8 @@ Se incorpora `game/project.godot` (Godot 4.5.1) y el pipeline Blender 4.5 LTS pa
 - [Resultados de fase 0](docs/PHASE0_RESULT.md)
 
 La escena principal ya contiene Forestín, sendero, cámara con colisión, locomoción y salto, tres guanacos, cuatro objetivos, guardado/checkpoints, pausa, audio y luz día/noche. Abrir `game/project.godot` en Godot 4.5.1 y pulsar F6 en `adventure/main.tscn` o F5. Controles: WASD, mouse, Shift, Espacio, E y Esc. Ver [resultado de fase 1](docs/PHASE1_RESULT.md). La calidad artística final y las pruebas físicas Windows/iOS siguen pendientes.
+
+Mejora visual actual: [paisaje, vegetación y personajes 0.1.1](docs/VISUAL_0_1_1.md).
 
 ---
 

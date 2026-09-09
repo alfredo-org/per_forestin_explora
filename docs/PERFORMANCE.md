@@ -25,3 +25,7 @@ Plantilla por ejecución: fecha; commit/build; plataforma/hardware; motor/render
 ## Prototipo 0.1.0
 
 Vegetación: 1400 instancias en perfiles normales, 420 visibles en LOW/MOBILE. Planos lejanos LOW/MOBILE ampliados a 260 m para conservar Torres. Sin mediciones en hardware objetivo; no se afirma 60 FPS.
+
+## Presupuesto 0.1.1
+
+810 hojas por árbol (405 LOW/MOBILE), cuatro triángulos por hoja; 1400 macollas con 24 triángulos cada una (420 visibles en perfil bajo). Las hojas están agrupadas por árbol. Geometría de detalle y terreno ampliado aumentan el coste frente a 0.1.0; medir en PC antes de fijar requisitos mínimos. CI guarda métricas del encuadre de fauna sin atribuir FPS de software a GPU física.

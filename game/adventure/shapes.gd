@@ -50,7 +50,7 @@ static func forestin() -> Node3D:
 	var fur := material(Color("9d693b"))
 	var face := material(Color("bf925a"))
 	var khaki := material(Color("b0a17a"))
-	var green := material(Color("315b35"),0.42)
+	var green := material(Color("315b35"),0.78)
 	var boots := material(Color("352e25"))
 	var eye := material(Color("101712"),0.12)
 	var cream := material(Color("e7dbc0"))
@@ -84,6 +84,15 @@ static func forestin() -> Node3D:
 	ellipsoid(head,Vector3(0,0.155,-0.22),Vector3(0.78,0.055,0.52),green)
 	box(head,Vector3(0,0.235,-0.301),Vector3(0.17,0.10,0.035),cream)
 	ellipsoid(root,Vector3(0,1.05,0.28),Vector3(0.46,0.57,0.23),green)
+	box(root,Vector3(0,1.04,.408),Vector3(.34,.025,.025),boots)
+	box(root,Vector3(0,.97,.414),Vector3(.055,.085,.025),cream)
+	for side in [-1,1]:
+		var leg:Node3D=root.get_node("LegL" if side<0 else "LegR")
+		box(leg,Vector3(0,-.695,-.05),Vector3(.25,.045,.37),boots)
+		for j in range(3):box(leg,Vector3(0,-.54,-.14+j*.045),Vector3(.16,.015,.016),khaki)
+		box(root,Vector3(side*.14,1.18,-.237),Vector3(.17,.04,.015),khaki)
+		fur_patch(head,Vector3(side*.20,-.08,-.19),Vector3(.17,.15,.17),Color("b98a53"),220,41+side)
+	fur_patch(head,Vector3.ZERO,Vector3(.35,.30,.28),Color("946236"),700,82)
 	return root
 static func guanaco() -> Node3D:
 	var root := Node3D.new()
@@ -107,6 +116,29 @@ static func guanaco() -> Node3D:
 		var ear:=ellipsoid(neck,Vector3(side*0.12,1.19,-0.22),Vector3(0.09,0.40,0.11),coat)
 		ear.rotation.z=side*-0.16
 		ellipsoid(neck,Vector3(side*0.152,0.97,-0.43),Vector3(0.035,0.06,0.05),black)
+		var inner:=ellipsoid(neck,Vector3(side*.12,1.20,-.273),Vector3(.045,.27,.018),pale)
+		inner.rotation.z=side*-.16
+		ellipsoid(neck,Vector3(side*.073,.88,-.704),Vector3(.027,.023,.016),black)
+	fur_patch(root,Vector3(0,1.12,0),Vector3(.31,.385,.525),Color("a67b49"),1000,119)
 	var tail:=capsule(root,Vector3(0,1.27,0.59),0.06,0.39,coat)
 	tail.rotation.x=1.0
 	return root
+
+static func fur_patch(parent:Node3D,center:Vector3,radii:Vector3,color:Color,count:int,seed_value:int)->void:
+	# Short, opaque fibers; one draw per patch and deterministic distribution.
+	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for v in [Vector3(-.003,0,0),Vector3(0,.022,0),Vector3(.003,0,0),Vector3(0,0,-.003),Vector3(0,.022,0),Vector3(0,0,.003)]:st.add_vertex(v)
+	st.generate_normals()
+	var mm:=MultiMesh.new();mm.transform_format=MultiMesh.TRANSFORM_3D;mm.use_colors=true;mm.mesh=st.commit();mm.instance_count=count
+	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
+	for i in range(count):
+		var direction:=Vector3(rng.randf_range(-1,1),rng.randf_range(-1,1),rng.randf_range(-1,1)).normalized()
+		var normal:=(direction/radii).normalized()
+		var tangent:=Vector3.RIGHT.cross(normal).normalized()
+		if tangent.length()<.01:tangent=Vector3.FORWARD
+		var b:=Basis(normal.cross(tangent).normalized(),normal,tangent)
+		mm.set_instance_transform(i,Transform3D(b.scaled(Vector3.ONE*rng.randf_range(.65,1.1)),center+direction*radii))
+		mm.set_instance_color(i,color.lerp(color.darkened(.26),rng.randf()))
+	var node:=MultiMeshInstance3D.new();node.multimesh=mm
+	var mat:=material(Color.WHITE);mat.vertex_color_use_as_albedo=true;mat.cull_mode=BaseMaterial3D.CULL_DISABLED
+	node.material_override=mat;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;parent.add_child(node)

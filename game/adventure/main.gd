@@ -120,7 +120,7 @@ func _process(delta:float)->void:
 		if player.position.y< -10 or absf(player.position.x)>42 or player.position.z< -103 or player.position.z>27:player.reset_to(point(CHECKPOINTS[data.stage])+Vector3.UP*0.2)
 		observed=minf(observed+delta,2.0) if data.stage==1 and can_observe() else 0.0
 		step_timer+=delta*Vector2(player.velocity.x,player.velocity.z).length()
-		if step_timer>1.7 and player.is_on_floor():step_timer=0;footsteps.pitch_scale=1+sin(Time.get_ticks_msec()*0.01)*0.06;footsteps.play()
+		if step_timer>1.7 and player.is_on_floor():step_timer=0;footsteps.pitch_scale=1+sin(Time.get_ticks_msec()*0.01)*0.06;play_sound(footsteps)
 	marker.visible=running and data.stage<4;marker.position=target()+Vector3.UP*(2+sin(Time.get_ticks_msec()*0.002)*0.16)
 	toast_time=maxf(0,toast_time-delta)
 	if toast_time<=0:toast_label.text=""
@@ -159,7 +159,7 @@ func interact()->bool:
 				if not data.collected.has(i) and player.position.distance_to(items[i].position)<2.6:
 					data.collected.append(i);sync_items();persist()
 					if data.collected.size()==3:advance("Gracias por cuidar el sendero")
-					else:toast("Residuo recogido · %d de 3"%data.collected.size());chime.play()
+					else:toast("Residuo recogido · %d de 3"%data.collected.size());play_sound(chime)
 					return true
 			return false
 		3:
@@ -168,7 +168,7 @@ func interact()->bool:
 			for animal in animals:animal.active=false
 		4:return false
 	return true
-func advance(message:String)->void:data.stage=mini(data.stage+1,4);persist();toast(message);chime.play();update_hud()
+func advance(message:String)->void:data.stage=mini(data.stage+1,4);persist();toast(message);play_sound(chime);update_hud()
 func persist()->void:
 	if not no_save and not Progress.save(data):toast("No se pudo guardar el progreso")
 func toast(message:String)->void:toast_label.text=message;toast_time=5
@@ -198,3 +198,6 @@ func setup_audio()->void:
 func _exit_tree()->void:
 	for audio in [ambience,chime,footsteps]:
 		if is_instance_valid(audio):audio.stop();audio.stream=null
+
+func play_sound(sound:AudioStreamPlayer)->void:
+	if DisplayServer.get_name()!="headless":sound.play()

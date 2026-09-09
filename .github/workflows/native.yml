@@ -33,7 +33,7 @@ jobs:
       - name: Import, smoke test and export Windows
         run: python tools/native.py export-windows
       - name: Capture native renderer (software OpenGL, not hardware performance)
-        run: timeout 90s xvfb-run -a .tools/godot-4.5.1/Godot_v4.5.1-stable_linux.x86_64 --path game --audio-driver Dummy --script res://tests/capture_adventure.gd -- --no-save
+        run: timeout 240s xvfb-run -a python tools/capture_native.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -55,6 +55,11 @@ func run()->void:
 	check(Progress.sanitize([1,2,3])==Progress.fresh(),"non-object save rejected")
 	scene.landscape.set_night(true);check(scene.landscape.sun.light_energy<0.3,"night lighting applies")
 	scene.landscape.apply_density("LOW");check(scene.landscape.grass_mesh.visible_instance_count==420,"low profile reduces grass")
+	check(not scene.landscape.leaf_multimeshes.is_empty(),"landscape contains instanced tree foliage")
+	for leaves in scene.landscape.leaf_multimeshes:
+		check(leaves.visible_instance_count==405,"low profile reduces tree foliage")
+	scene.landscape.apply_density("HIGH")
+	check(scene.landscape.leaf_multimeshes[0].visible_instance_count==810,"high profile restores tree foliage")
 	var test_save:="user://forestin_qa_%d.json"%Time.get_ticks_usec()
 	check(Progress.save(saved,test_save),"save writes successfully")
 	check(Progress.read(test_save)==saved,"save reload preserves complete progress")
