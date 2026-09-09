@@ -15,3 +15,7 @@ Luz: estados día/atardecer/noche antes de ciclo completo. Contraste legible, ai
 Fuente `.blend`, GLB, identificador/versionado, unidades declaradas, pivote, transforms aplicadas, materiales/texturas y animaciones nombradas. Comprobar escala con referencia de 1 metro; usar conversión de ejes del exportador y evitar rotaciones manuales repetidas. Cada asset registra procedencia y dependencias. Detallar LOD y colisión separada cuando existan.
 
 QA manual: rostro en primer plano, silueta lateral/trasera, manos/pies en interacción, deslizamiento de pies, clipping, lectura a distancia y comparación diurna/nocturna. Capturas deben indicar resolución, perfil y commit.
+
+## Estado 0.1.0
+
+Personaje y fauna procedurales provisionales, fondo Torres reutilizado del prototipo y geometría de primer plano. Pendientes modelos Blender y validación perceptual de calidad final.

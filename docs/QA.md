@@ -27,3 +27,7 @@ Esta documentación inicial no afirma que se hayan ejecutado pruebas, builds o r
 Forestín reconocible, guanacos anatómicamente legibles, pies sin deslizamiento evidente, sombras/reflejos sin artefactos, fondo Torres integrado y HUD legible día/noche. Grabar recorrido comparable en PC y posteriormente en iPhone. Headless, compilación y conteo de triángulos no acreditan estas condiciones.
 
 Cerrar cada iteración distinguiendo: implementado, ejecutado, comprobado visualmente y pendiente. Un gate bloqueado debe incluir requisito concreto (herramienta, plantilla, hardware o firma) y siguiente paso. No sustituir un fallo por una nota de éxito.
+
+## Resultado fase 1
+
+Ver [registro de fase 1](PHASE1_RESULT.md). El driver ahora exige éxito de la aventura además del bootstrap. El test gráfico separado guarda título, día, personaje y noche; generar imágenes no equivale a aprobarlas visualmente.

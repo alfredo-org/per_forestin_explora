@@ -48,3 +48,7 @@ Comandos nativos producen `builds/reports/doctor.json`, logs y `native-result.js
 Ejecutar `python tools/validate_blender.py --blender "ruta/al/blender" --godot "ruta/al/godot"`. El script crea una fuente temporal bajo `builds/`, exporta mediante `blender/scripts/export_glb.py`, comprueba SHA-256 de la fuente antes/después y carga el GLB con `game/tests/glb_test.gd`. Usar `--python-exit-code 1` para propagar fallos de Python. El cubo de prueba valida escala y transporte, no anatomía, rig ni animaciones del futuro Forestín.
 
 Ver [PHASE0_RESULT.md](PHASE0_RESULT.md) para evidencia y pendientes de esta ejecución.
+
+## Capturas 0.1.0
+
+En un entorno con pantalla, ejecutar Godot con `--path game --script res://tests/capture_adventure.gd -- --no-save`. CI usa Xvfb y guarda PNG en `builds/reports`. No confundir el render por software del runner con rendimiento de PC.

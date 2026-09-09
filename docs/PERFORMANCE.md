@@ -21,3 +21,7 @@ Usar mismo commit, cámara/recorrido, semilla, escena y hora del día. Registrar
 En iPhone registrar modelo, versión iOS, alimentación, brillo, duración y estado térmico disponible. Evaluar sesión prolongada y suspensión/reanudación. No comparar muestras con configuraciones distintas como mejoras concluyentes.
 
 Plantilla por ejecución: fecha; commit/build; plataforma/hardware; motor/renderer; resolución/perfil; FPS medio; 1% low; frame time p95; RAM/VRAM; draw calls/triángulos; carga; duración; limitaciones. Si una métrica no está disponible, escribir “no medido”.
+
+## Prototipo 0.1.0
+
+Vegetación: 1400 instancias en perfiles normales, 420 visibles en LOW/MOBILE. Planos lejanos LOW/MOBILE ampliados a 260 m para conservar Torres. Sin mediciones en hardware objetivo; no se afirma 60 FPS.

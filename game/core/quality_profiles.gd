@@ -1,11 +1,11 @@
 extends RefCounted
 ## Only settings applied by this baseline are exposed; no speculative LOD knobs.
 const PROFILES := {
-	"LOW": {"scale": 0.75, "msaa": Viewport.MSAA_DISABLED, "shadows": false, "far": 150.0},
+	"LOW": {"scale": 0.75, "msaa": Viewport.MSAA_DISABLED, "shadows": false, "far": 260.0},
 	"MEDIUM": {"scale": 0.85, "msaa": Viewport.MSAA_2X, "shadows": true, "far": 250.0},
 	"HIGH": {"scale": 1.0, "msaa": Viewport.MSAA_4X, "shadows": true, "far": 400.0},
 	"ULTRA": {"scale": 1.0, "msaa": Viewport.MSAA_8X, "shadows": true, "far": 600.0},
-	"MOBILE": {"scale": 0.75, "msaa": Viewport.MSAA_DISABLED, "shadows": false, "far": 120.0},
+	"MOBILE": {"scale": 0.75, "msaa": Viewport.MSAA_DISABLED, "shadows": false, "far": 260.0},
 }
 
 static func apply(profile: String, viewport: Viewport, camera: Camera3D, sun: DirectionalLight3D) -> bool:

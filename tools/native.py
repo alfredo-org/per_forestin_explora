@@ -84,13 +84,16 @@ def main():
         report['godot_version'] = version
         if not version.startswith(CONFIG['godot'] + '.stable'):
             raise RuntimeError('Expected Godot ' + CONFIG['godot'] + '.stable; got ' + version)
-        run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--editor', '--import'], 'import')
+        run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--editor', '--import', '--quit'], 'import')
         output = run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--script', 'res://tests/smoke_test.gd'], 'smoke')
         if 'FORESTIN_SMOKE_RESULT failures=0' not in output:
             raise RuntimeError('Smoke test exited without a passing result marker')
-        output = run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--quit-after', '10'], 'main-scene')
-        if 'FORESTIN_BOOT_OK' not in output:
-            raise RuntimeError('Configured main scene did not reach bootstrap')
+        output = run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--quit-after', '10', '--', '--no-save'], 'main-scene')
+        if 'FORESTIN_ADVENTURE_READY' not in output:
+            raise RuntimeError('Configured main scene did not reach adventure')
+        output = run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--script', 'res://tests/adventure_test.gd', '--', '--no-save'], 'adventure')
+        if 'FORESTIN_ADVENTURE_RESULT failures=0' not in output:
+            raise RuntimeError('Adventure checks did not pass')
         if args.command == 'export-windows':
             target = ROOT / 'builds/windows/ForestinAventura.exe'
             target.parent.mkdir(parents=True, exist_ok=True)

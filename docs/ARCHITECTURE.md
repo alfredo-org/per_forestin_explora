@@ -31,3 +31,7 @@ Las mallas de fondo no deben participar en colisiones ni objetivos. El sendero y
 ## Criterio de migración
 
 Portar primero un recorrido pequeño con controles, cámara, un guanaco y un checkpoint. Luego comparar comportamiento con la web; trasladar reglas verificables antes de sustituir presentación. No retirar la versión web como parte de fase 0. El perfil visual inicial puede ser conservador mientras se valida la toolchain; la elección PC final y móvil se resuelve con mediciones GPU.
+
+## Aventura nativa 0.1.0
+
+`game/adventure/main.gd` integra UI y misión; `player.gd` resuelve locomoción/cámara; `wildlife.gd` percepción y movimiento; `landscape.gd` escenario; `shapes.gd` modelos provisionales; `progress.gd` validación y persistencia. Los tests nativos ejecutan la escena real.
