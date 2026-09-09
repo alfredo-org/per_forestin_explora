@@ -191,7 +191,7 @@ func signpost(pos:Vector2,text:String)->void:
 	var l:=Label3D.new();l.text=text;l.font_size=30;l.pixel_size=0.0013;l.position=Vector3(0,1.25,0.06);l.modulate=Color("efe3c3");n.add_child(l)
 func setup_audio()->void:
 	ambience=AudioStreamPlayer.new();add_child(ambience);var wav:AudioStreamWAV=load("res://adventure/wind.wav");wav.loop_mode=AudioStreamWAV.LOOP_FORWARD;wav.loop_end=int(wav.mix_rate*wav.get_length());ambience.stream=wav;ambience.volume_db=-20
-	if DisplayServer.get_name()!="headless":ambience.play()
+	if DisplayServer.get_name()!="headless" and not OS.get_cmdline_user_args().has("--silent-audio"):ambience.play()
 	chime=AudioStreamPlayer.new();add_child(chime);chime.stream=load("res://adventure/chime.wav");chime.volume_db=-17
 	footsteps=AudioStreamPlayer.new();add_child(footsteps);footsteps.stream=load("res://adventure/step.wav");footsteps.volume_db=-20
 
@@ -200,4 +200,4 @@ func _exit_tree()->void:
 		if is_instance_valid(audio):audio.stop();audio.stream=null
 
 func play_sound(sound:AudioStreamPlayer)->void:
-	if DisplayServer.get_name()!="headless":sound.play()
+	if DisplayServer.get_name()!="headless" and not OS.get_cmdline_user_args().has("--silent-audio"):sound.play()

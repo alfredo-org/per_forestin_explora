@@ -22,3 +22,7 @@ El reporte `render-metrics.json` registra primitivas, draw calls y nodos de un e
 Revisión artística de los personajes, rigs y animaciones definitivos; integración del fondo a todas las distancias; paisaje con composición dirigida; audio espacial trabajado; sesiones completas de juego con usuarios; rendimiento y estabilidad en PC Windows real; alcance y duración del contenido comercial; revisión de los derechos de todos los assets y de la identidad del personaje. iOS requiere controles y pruebas físicas propias.
 
 La ejecución paralela solicitada no estuvo disponible por límite de uso de agentes. El trabajo se realizó directamente, sin simular revisiones de agentes que no se ejecutaron.
+
+## Hallazgos y correcciones de la primera captura
+
+El primer render mostró relieve lejano demasiado claro y 2.221 llamadas de dibujo en su encuadre final. Se agruparon troncos y ramas en una superficie por árbol para reducir objetos y llamadas, se oscureció el relieve con material propio y se corrigió la cámara de fauna. La captura detectó además un recurso de audio retenido al cerrar con el driver Dummy: la captura visual ahora usa una opción explícita de audio silencioso; el juego normal conserva su audio. La nueva captura registra métricas por encuadre, por lo que no se deben comparar automáticamente valores de cámaras distintas.

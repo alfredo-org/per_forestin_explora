@@ -105,15 +105,15 @@ func build_ridges()->void:
 		var columns:Array[Vector3]=[]
 		for angle in [a,b]:
 			var direction:=Vector3(sin(angle),0,cos(angle))
-			var peak:=15.0+absf(noise.get_noise_2d(direction.x*100,direction.z*100))*28
+			var peak:=7.0+absf(noise.get_noise_2d(direction.x*100,direction.z*100))*20
 			if direction.z<-.7:peak*=.45
-			columns.append(center+direction*65+Vector3.DOWN*3)
-			columns.append(center+direction*101+Vector3.UP*peak)
-			columns.append(center+direction*149+Vector3.DOWN*5)
+			columns.append(center+direction*78+Vector3.DOWN*3)
+			columns.append(center+direction*118+Vector3.UP*peak)
+			columns.append(center+direction*170+Vector3.DOWN*5)
 		for index in [0,3,1,1,3,4,1,4,2,2,4,5]:
 			var v:Vector3=columns[index]
 			st.set_color(Color("525e58").lerp(Color("9a9c8b"),clampf(v.y/35,0,1)));st.add_vertex(v)
 	st.generate_normals()
 	var node:=MeshInstance3D.new();node.name="DistantRidges";node.mesh=st.commit()
-	var mat:=Shapes.material(Color.WHITE);mat.vertex_color_use_as_albedo=true;mat.cull_mode=BaseMaterial3D.CULL_DISABLED
+	var mat:=ShaderMaterial.new();mat.shader=preload("res://adventure/environment/ridge.gdshader")
 	node.material_override=mat;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;add_child(node)

@@ -38,6 +38,13 @@ static func tree(parent:Node3D,base:Vector3,size:float,seed_value:int,leaf:Mesh,
 		branch(root,start,endpoint,.065-j*.004,bark)
 		branch(root,endpoint,endpoint+Vector3(.2,.45,-.12),.022,bark)
 		clusters.append(endpoint+Vector3(0,.3,0))
+	# Bake all woody parts into one surface instead of nineteen draw calls per tree.
+	var wood:=SurfaceTool.new();wood.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for child in root.get_children():
+		if child is MeshInstance3D:
+			wood.append_from(child.mesh,0,child.transform)
+			child.free()
+	var trunk:=MeshInstance3D.new();trunk.mesh=wood.commit();trunk.material_override=bark;root.add_child(trunk)
 	var leaves:=MultiMesh.new();leaves.transform_format=MultiMesh.TRANSFORM_3D;leaves.use_colors=true;leaves.mesh=leaf;leaves.instance_count=810
 	for i in range(leaves.instance_count):
 		var center:=clusters[i%clusters.size()]
