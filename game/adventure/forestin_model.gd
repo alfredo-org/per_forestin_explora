@@ -14,6 +14,38 @@ static func line(p:Node3D,a:Vector3,b:Vector3,r:float,m:Material)->void:
 	n.mesh=s;n.position=(a+b)*.5;n.quaternion=Quaternion(Vector3.UP,(b-a).normalized());n.material_override=m;p.add_child(n)
 static func text3(p:Node3D,pos:Vector3,value:String,size:float,color:Color)->void:
 	var t:=Label3D.new();t.text=value;t.font_size=64;t.pixel_size=size;t.position=pos;t.rotation.y=PI;t.modulate=color;t.outline_size=0;t.no_depth_test=false;p.add_child(t)
+# Lofted contour surfaces: each garment/head is one indexed, smooth-normal mesh.
+# Profile components: height, half-width, half-depth, depth offset.
+static func contour(p:Node3D,pos:Vector3,profile:Array[Vector4],m:Material,fold:float=0.0)->MeshInstance3D:
+	var rings:Array[Vector4]=[]
+	for i in range(profile.size()-1):
+		var a:Vector4=profile[maxi(i-1,0)];var b:Vector4=profile[i]
+		var c:Vector4=profile[i+1];var d:Vector4=profile[mini(i+2,profile.size()-1)]
+		for step in range(6):
+			var t:=float(step)/6.0
+			rings.append((2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t)*.5)
+	rings.append(profile[-1])
+	var vertices:=PackedVector3Array();var normals:=PackedVector3Array();var uv:=PackedVector2Array();var indices:=PackedInt32Array()
+	var segments:=40
+	for j in range(rings.size()):
+		var r:Vector4=rings[j]
+		var before:Vector4=rings[maxi(j-1,0)];var after:Vector4=rings[mini(j+1,rings.size()-1)]
+		for k in range(segments+1):
+			var angle:=TAU*float(k)/segments
+			var crease:=1.0+fold*sin(angle*5.0+r.x*33.0)*sin(PI*float(j)/float(rings.size()-1))
+			var rx:=maxf(.001,r.y);var rz:=maxf(.001,r.z)
+			vertices.append(Vector3(rx*cos(angle)*crease,r.x,r.w+rz*sin(angle)*crease))
+			var up:=Vector3((after.y-before.y)*cos(angle),after.x-before.x,after.w-before.w+(after.z-before.z)*sin(angle))
+			var tangent:=Vector3(-rx*sin(angle),0,rz*cos(angle))
+			normals.append(up.cross(tangent).normalized())
+			uv.append(Vector2(float(k)/segments,float(j)/float(rings.size()-1)))
+	for j in range(rings.size()-1):
+		for k in range(segments):
+			var a:=j*(segments+1)+k;var b:=a+segments+1
+			for index in [a,a+1,b,a+1,b+1,b]:indices.append(index)
+	var arrays:=[];arrays.resize(Mesh.ARRAY_MAX);arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_NORMAL]=normals;arrays[Mesh.ARRAY_TEX_UV]=uv;arrays[Mesh.ARRAY_INDEX]=indices
+	var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+	var n:=MeshInstance3D.new();n.mesh=mesh;n.material_override=m;n.position=pos;p.add_child(n);return n
 static func build()->Node3D:
 	var root:=Node3D.new();root.name="Forestin"
 	var fur:=mat("e98122");var inner:=mat("bc5017");var muzzle:=mat("ffe0a0")
@@ -21,9 +53,9 @@ static func build()->Node3D:
 	var white:=mat("fff9ed",.35);var gold:=mat("edb650",.3);var leather:=mat("a94d21",.5);var sole:=mat("d68035")
 	var dark:=mat("29140c",.35);var mouth:=mat("40110f");var tongue:=mat("e85459");var iris:=mat("934211",.25)
 	# Rounded work shirt and overalls. Front of the character is -Z.
-	oval(root,Vector3(0,1.04,0),Vector3(.61,.70,.43),yellow)
-	oval(root,Vector3(0,.83,.015),Vector3(.58,.39,.43),green)
-	oval(root,Vector3(0,1.0,-.183),Vector3(.51,.43,.13),green)
+	contour(root,Vector3.ZERO,[Vector4(.76,.19,.15,0),Vector4(.86,.28,.20,0),Vector4(1.02,.29,.218,0),Vector4(1.19,.285,.205,0),Vector4(1.29,.245,.16,0),Vector4(1.37,.115,.105,0),Vector4(1.39,.001,.001,0)],yellow,.009)
+	contour(root,Vector3.ZERO,[Vector4(.64,.13,.12,0),Vector4(.71,.265,.194,.008),Vector4(.84,.294,.218,.008),Vector4(.93,.287,.223,.002),Vector4(.955,.277,.212,0)],green,.012)
+	contour(root,Vector3(0,0,-.208),[Vector4(.85,.21,.035,0),Vector4(.94,.25,.039,0),Vector4(1.07,.244,.033,0),Vector4(1.13,.219,.025,0),Vector4(1.145,.205,.008,0)],green)
 	block(root,Vector3(0,.94,-.249),Vector3(.29,.20,.025),seam)
 	oval(root,Vector3(0,.94,-.268),Vector3(.28,.21,.035),green)
 	text3(root,Vector3(0,.95,-.289),"CONAF",.00062,Color.WHITE)
@@ -34,9 +66,9 @@ static func build()->Node3D:
 		oval(root,Vector3(side*.205,1.08,-.25),Vector3(.051,.051,.022),gold)
 		var collar:=block(root,Vector3(side*.085,1.31,-.20),Vector3(.13,.095,.05),yellow);collar.rotation.z=side*.40
 		var leg:=node(root,Vector3(side*.16,.74,0),"LegL" if side<0 else "LegR")
-		oval(leg,Vector3(0,-.14,0),Vector3(.27,.39,.29),green)
+		contour(leg,Vector3.ZERO,[Vector4(-.36,.102,.115,0),Vector4(-.30,.115,.125,0),Vector4(-.18,.132,.143,0),Vector4(-.03,.143,.155,.002),Vector4(.055,.105,.118,0)],green,.017)
 		var knee:=node(leg,Vector3(0,-.32,0),"Knee")
-		oval(knee,Vector3(0,-.12,0),Vector3(.245,.37,.255),green)
+		contour(knee,Vector3.ZERO,[Vector4(-.27,.12,.125,0),Vector4(-.235,.123,.132,0),Vector4(-.19,.11,.118,.005),Vector4(-.08,.116,.123,0),Vector4(.025,.111,.123,0)],green,.023)
 		oval(knee,Vector3(0,-.225,-.005),Vector3(.26,.09,.27),seam)
 		block(leg,Vector3(side*.085,-.17,-.109),Vector3(.115,.17,.03),green)
 		oval(leg,Vector3(side*.085,-.11,-.13),Vector3(.035,.035,.015),gold)
@@ -49,9 +81,9 @@ static func build()->Node3D:
 				block(ankle,Vector3(s*.132,-.107,-.23+j*.092),Vector3(.036,.037,.04),dark)
 			line(ankle,Vector3(-.065,.116-j*.015,-.065-j*.030),Vector3(.065,.10-j*.015,-.094-j*.030),.007,gold)
 		var arm:=node(root,Vector3(side*.32,1.20,0),"ArmL" if side<0 else "ArmR")
-		oval(arm,Vector3(side*.018,-.095,0),Vector3(.245,.31,.25),yellow)
+		contour(arm,Vector3(side*.018,0,0),[Vector4(-.25,.085,.093,0),Vector4(-.16,.10,.106,0),Vector4(-.035,.12,.122,0),Vector4(.055,.093,.10,0),Vector4(.092,.001,.001,0)],yellow,.016)
 		var elbow:=node(arm,Vector3(side*.035,-.22,0),"Elbow")
-		oval(elbow,Vector3(0,-.077,0),Vector3(.205,.245,.21),yellow)
+		contour(elbow,Vector3.ZERO,[Vector4(-.174,.088,.092,0),Vector4(-.135,.093,.098,0),Vector4(-.065,.10,.102,0),Vector4(.034,.088,.094,0)],yellow,.023)
 		oval(elbow,Vector3(0,-.15,0),Vector3(.22,.065,.22),yellow)
 		oval(elbow,Vector3(0,-.232,-.025),Vector3(.20,.205,.18),fur)
 		oval(elbow,Vector3(-side*.082,-.208,-.06),Vector3(.095,.12,.10),fur)
@@ -62,20 +94,12 @@ static func build()->Node3D:
 	block(root,Vector3(-.105,1.207,-.232),Vector3(.115,.036,.009),mat("db2430"))
 	block(root,Vector3(-.14,1.243,-.233),Vector3(.045,.036,.009),mat("154fa6"))
 	text3(root,Vector3(-.14,1.243,-.24),"★",.00048,Color.WHITE)
-	# Beaver tail: flattened paddle behind the hips with a diamond pattern.
-	var tail:=node(root,Vector3(.10,.53,.285),"Tail");tail.rotation.x=.30
-	oval(tail,Vector3(0,-.06,.05),Vector3(.44,.65,.12),leather)
-	for j in range(-3,4):
-		var y:=float(j)*.067
-		line(tail,Vector3(-.14,y-.13,.107),Vector3(.14,y+.07,.107),.004,dark)
-		line(tail,Vector3(-.14,y+.07,.11),Vector3(.14,y-.13,.11),.004,dark)
 	# Oversized friendly head, broad cheeks and layered eyes.
 	var head:=node(root,Vector3(0,1.52,-.025),"Head")
-	oval(head,Vector3.ZERO,Vector3(.76,.64,.60),fur)
+	contour(head,Vector3.ZERO,[Vector4(-.322,.001,.001,-.025),Vector4(-.295,.15,.115,-.04),Vector4(-.23,.29,.215,-.018),Vector4(-.13,.365,.284,-.012),Vector4(-.02,.368,.295,0),Vector4(.12,.329,.274,.015),Vector4(.23,.26,.22,.024),Vector4(.30,.12,.12,.02),Vector4(.32,.001,.001,.02)],fur)
 	for side in [-1,1]:
 		oval(head,Vector3(side*.355,.035,0),Vector3(.22,.24,.15),fur)
 		oval(head,Vector3(side*.365,.035,-.07),Vector3(.13,.14,.045),inner)
-		oval(head,Vector3(side*.245,-.11,-.145),Vector3(.28,.32,.31),fur)
 		var eye:=node(head,Vector3(side*.155,.055,-.258),"EyeL" if side<0 else "EyeR")
 		oval(eye,Vector3.ZERO,Vector3(.192,.225,.10),inner)
 		oval(eye,Vector3(0,-.004,-.019),Vector3(.166,.199,.094),white)
@@ -94,10 +118,10 @@ static func build()->Node3D:
 	oval(head,Vector3(0,-.043,-.392),Vector3(.162,.104,.096),dark)
 	oval(head,Vector3(-.028,-.014,-.435),Vector3(.045,.021,.007),mat("865749",.3))
 	# White safety helmet, brim, raised ribs and front wordmark.
-	oval(head,Vector3(0,.272,.014),Vector3(.86,.43,.73),white)
+	contour(head,Vector3.ZERO,[Vector4(.145,.422,.35,.01),Vector4(.20,.416,.345,.014),Vector4(.30,.373,.314,.02),Vector4(.395,.295,.255,.03),Vector4(.456,.16,.145,.035),Vector4(.475,.001,.001,.035)],white)
 	oval(head,Vector3(0,.144,-.045),Vector3(.91,.058,.82),white)
 	for x in [-.24,0,.24]:
 		oval(head,Vector3(x,.40,.016),Vector3(.055,.17,.48),white)
-	text3(head,Vector3(0,.282,-.346),"Forestín",.0010,Color("005739"))
-	var leaf:=oval(head,Vector3(.131,.35,-.333),Vector3(.025,.058,.012),mat("63ae3c"));leaf.rotation.z=-.35
+	text3(head,Vector3(0,.282,-.335),"Forestín",.0010,Color("005739"))
+	var leaf:=oval(head,Vector3(.131,.35,-.29),Vector3(.025,.058,.012),mat("63ae3c"));leaf.rotation.z=-.35
 	return root
