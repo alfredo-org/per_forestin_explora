@@ -46,6 +46,37 @@ static func contour(p:Node3D,pos:Vector3,profile:Array[Vector4],m:Material,fold:
 	var arrays:=[];arrays.resize(Mesh.ARRAY_MAX);arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_NORMAL]=normals;arrays[Mesh.ARRAY_TEX_UV]=uv;arrays[Mesh.ARRAY_INDEX]=indices
 	var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	var n:=MeshInstance3D.new();n.mesh=mesh;n.material_override=m;n.position=pos;p.add_child(n);return n
+# Curved bib and straps follow the chest instead of sitting on a flat plate.
+static func chest_front(x:float,y:float)->float:
+	var width:=.324;var depth:=.307;var center:=.018
+	if y>1.02:
+		var t:=clampf((y-1.02)/.27,0,1)
+		width=lerpf(.324,.27,t);depth=lerpf(.307,.225,t);center=lerpf(.018,.035,t)
+	return center-depth*sqrt(maxf(.01,1.0-pow(x/width,2)))-.013
+static func cloth_panel(p:Node3D,m:Material,left:float,right:float,bottom:float,top:float,taper:float)->void:
+	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var cols:=16;var rows:=16
+	var points:Array[Vector3]=[]
+	for j in range(rows+1):
+		var v:=float(j)/rows;var y:=lerpf(bottom,top,v)
+		for i in range(cols+1):
+			var x:=lerpf(left,right,float(i)/cols)*lerpf(1.0,taper,v)
+			points.append(Vector3(x,y,chest_front(x,y)))
+	for j in range(rows):
+		for i in range(cols):
+			var a:=j*(cols+1)+i;var b:=a+cols+1
+			for k in [a,b,a+1,a+1,b,b+1]:
+				st.set_smooth_group(0);st.add_vertex(points[k])
+	st.generate_normals()
+	var n:=MeshInstance3D.new();n.mesh=st.commit();n.material_override=m;p.add_child(n)
+static func bib(p:Node3D,m:Material)->void:
+	cloth_panel(p,m,-.26,.26,.86,1.145,.83)
+static func strap(p:Node3D,side:float,m:Material)->void:
+	var center:=side*.211
+	cloth_panel(p,m,center-.04,center+.04,1.10,1.305,.91)
+	# Matching shoulder straps on the back make the outfit readable from behind.
+	var back:=contour(p,Vector3(center,0,.228),[Vector4(.94,.035,.023,0),Vector4(1.10,.037,.028,.03),Vector4(1.23,.036,.023,-.012),Vector4(1.30,.031,.017,-.074)],m)
+	back.name="BackStrapL" if side<0 else "BackStrapR"
 static func build()->Node3D:
 	var root:=Node3D.new();root.name="Forestin"
 	var fur:=mat("e98122");var inner:=mat("bc5017");var muzzle:=mat("ffe0a0")
@@ -53,25 +84,25 @@ static func build()->Node3D:
 	var white:=mat("fff9ed",.35);var gold:=mat("edb650",.3);var leather:=mat("a94d21",.5);var sole:=mat("d68035")
 	var dark:=mat("29140c",.35);var mouth:=mat("40110f");var tongue:=mat("e85459");var iris:=mat("934211",.25)
 	# Rounded work shirt and overalls. Front of the character is -Z.
-	contour(root,Vector3.ZERO,[Vector4(.76,.19,.15,0),Vector4(.86,.28,.20,0),Vector4(1.02,.29,.218,0),Vector4(1.19,.285,.205,0),Vector4(1.29,.245,.16,0),Vector4(1.37,.115,.105,0),Vector4(1.39,.001,.001,0)],yellow,.009)
-	contour(root,Vector3.ZERO,[Vector4(.64,.13,.12,0),Vector4(.71,.265,.194,.008),Vector4(.84,.294,.218,.008),Vector4(.93,.287,.223,.002),Vector4(.955,.277,.212,0)],green,.012)
-	contour(root,Vector3(0,0,-.208),[Vector4(.85,.21,.035,0),Vector4(.94,.25,.039,0),Vector4(1.07,.244,.033,0),Vector4(1.13,.219,.025,0),Vector4(1.145,.205,.008,0)],green)
-	block(root,Vector3(0,.94,-.249),Vector3(.29,.20,.025),seam)
-	oval(root,Vector3(0,.94,-.268),Vector3(.28,.21,.035),green)
-	text3(root,Vector3(0,.95,-.289),"CONAF",.00062,Color.WHITE)
+	contour(root,Vector3.ZERO,[Vector4(.76,.22,.205,.025),Vector4(.86,.315,.285,.018),Vector4(1.02,.324,.307,.018),Vector4(1.19,.318,.285,.028),Vector4(1.29,.27,.225,.035),Vector4(1.37,.13,.142,.022),Vector4(1.39,.001,.001,0)],yellow,.009)
+	contour(root,Vector3.ZERO,[Vector4(.64,.16,.16,.022),Vector4(.71,.29,.255,.03),Vector4(.84,.325,.295,.02),Vector4(.93,.321,.304,.016),Vector4(.955,.316,.301,.014)],green,.012)
+	bib(root,green)
+	block(root,Vector3(0,.94,-.305),Vector3(.29,.20,.025),seam)
+	oval(root,Vector3(0,.94,-.326),Vector3(.28,.21,.035),green)
+	text3(root,Vector3(0,.95,-.347),"CONAF",.00062,Color.WHITE)
 	for side in [-1,1]:
-		block(root,Vector3(side*.215,1.17,-.20),Vector3(.075,.34,.045),green)
-		block(root,Vector3(side*.215,1.195,-.229),Vector3(.092,.061,.022),gold)
-		block(root,Vector3(side*.215,1.195,-.244),Vector3(.065,.032,.008),green)
-		oval(root,Vector3(side*.205,1.08,-.25),Vector3(.051,.051,.022),gold)
-		var collar:=block(root,Vector3(side*.085,1.31,-.20),Vector3(.13,.095,.05),yellow);collar.rotation.z=side*.40
-		var leg:=node(root,Vector3(side*.16,.74,0),"LegL" if side<0 else "LegR")
-		contour(leg,Vector3.ZERO,[Vector4(-.36,.102,.115,0),Vector4(-.30,.115,.125,0),Vector4(-.18,.132,.143,0),Vector4(-.03,.143,.155,.002),Vector4(.055,.105,.118,0)],green,.017)
+		strap(root,float(side),green)
+		block(root,Vector3(side*.215,1.195,-.203),Vector3(.092,.061,.022),gold)
+		block(root,Vector3(side*.215,1.195,-.218),Vector3(.065,.032,.008),green)
+		oval(root,Vector3(side*.205,1.08,-.235),Vector3(.051,.051,.022),gold)
+		var collar:=block(root,Vector3(side*.085,1.31,-.209),Vector3(.13,.095,.05),yellow);collar.rotation.z=side*.40
+		var leg:=node(root,Vector3(side*.18,.74,.01),"LegL" if side<0 else "LegR")
+		contour(leg,Vector3.ZERO,[Vector4(-.36,.118,.145,0),Vector4(-.30,.13,.156,0),Vector4(-.18,.151,.184,.008),Vector4(-.03,.162,.199,.014),Vector4(.055,.128,.155,.014)],green,.017)
 		var knee:=node(leg,Vector3(0,-.32,0),"Knee")
-		contour(knee,Vector3.ZERO,[Vector4(-.27,.12,.125,0),Vector4(-.235,.123,.132,0),Vector4(-.19,.11,.118,.005),Vector4(-.08,.116,.123,0),Vector4(.025,.111,.123,0)],green,.023)
-		oval(knee,Vector3(0,-.225,-.005),Vector3(.26,.09,.27),seam)
-		block(leg,Vector3(side*.085,-.17,-.109),Vector3(.115,.17,.03),green)
-		oval(leg,Vector3(side*.085,-.11,-.13),Vector3(.035,.035,.015),gold)
+		contour(knee,Vector3.ZERO,[Vector4(-.27,.126,.14,0),Vector4(-.235,.131,.152,0),Vector4(-.19,.13,.155,.012),Vector4(-.08,.137,.164,.012),Vector4(.025,.126,.154,0)],green,.023)
+		oval(knee,Vector3(0,-.225,-.005),Vector3(.28,.09,.31),seam)
+		block(leg,Vector3(side*.085,-.17,-.157),Vector3(.115,.17,.03),green)
+		oval(leg,Vector3(side*.085,-.11,-.183),Vector3(.035,.035,.015),gold)
 		var ankle:=node(knee,Vector3(0,-.32,0),"Ankle")
 		oval(ankle,Vector3(0,.035,-.027),Vector3(.23,.27,.29),leather)
 		oval(ankle,Vector3(0,-.012,-.09),Vector3(.29,.20,.43),leather)
@@ -80,20 +111,20 @@ static func build()->Node3D:
 			for s in [-1,1]:
 				block(ankle,Vector3(s*.132,-.107,-.23+j*.092),Vector3(.036,.037,.04),dark)
 			line(ankle,Vector3(-.065,.116-j*.015,-.065-j*.030),Vector3(.065,.10-j*.015,-.094-j*.030),.007,gold)
-		var arm:=node(root,Vector3(side*.32,1.20,0),"ArmL" if side<0 else "ArmR")
-		contour(arm,Vector3(side*.018,0,0),[Vector4(-.25,.085,.093,0),Vector4(-.16,.10,.106,0),Vector4(-.035,.12,.122,0),Vector4(.055,.093,.10,0),Vector4(.092,.001,.001,0)],yellow,.016)
+		var arm:=node(root,Vector3(side*.367,1.20,.02),"ArmL" if side<0 else "ArmR")
+		contour(arm,Vector3(side*.018,0,0),[Vector4(-.25,.098,.121,0),Vector4(-.16,.123,.142,0),Vector4(-.035,.145,.163,.01),Vector4(.055,.113,.135,.01),Vector4(.092,.001,.001,0)],yellow,.016)
 		var elbow:=node(arm,Vector3(side*.035,-.22,0),"Elbow")
-		contour(elbow,Vector3.ZERO,[Vector4(-.174,.088,.092,0),Vector4(-.135,.093,.098,0),Vector4(-.065,.10,.102,0),Vector4(.034,.088,.094,0)],yellow,.023)
-		oval(elbow,Vector3(0,-.15,0),Vector3(.22,.065,.22),yellow)
-		oval(elbow,Vector3(0,-.232,-.025),Vector3(.20,.205,.18),fur)
+		contour(elbow,Vector3.ZERO,[Vector4(-.174,.099,.112,0),Vector4(-.135,.109,.124,0),Vector4(-.065,.12,.135,.008),Vector4(.034,.102,.121,0)],yellow,.023)
+		oval(elbow,Vector3(0,-.15,0),Vector3(.24,.065,.255),yellow)
+		oval(elbow,Vector3(0,-.232,-.025),Vector3(.222,.215,.215),fur)
 		oval(elbow,Vector3(-side*.082,-.208,-.06),Vector3(.095,.12,.10),fur)
 		for finger in range(3):
 			oval(elbow,Vector3(-.06+finger*.057,-.271,-.06),Vector3(.063,.081,.09),fur)
 	# Chilean patch with geometric star.
-	block(root,Vector3(-.105,1.225,-.224),Vector3(.115,.073,.012),white)
-	block(root,Vector3(-.105,1.207,-.232),Vector3(.115,.036,.009),mat("db2430"))
-	block(root,Vector3(-.14,1.243,-.233),Vector3(.045,.036,.009),mat("154fa6"))
-	text3(root,Vector3(-.14,1.243,-.24),"★",.00048,Color.WHITE)
+	block(root,Vector3(-.105,1.225,-.227),Vector3(.115,.073,.012),white)
+	block(root,Vector3(-.105,1.207,-.245),Vector3(.115,.036,.009),mat("db2430"))
+	block(root,Vector3(-.14,1.243,-.223),Vector3(.045,.036,.009),mat("154fa6"))
+	text3(root,Vector3(-.14,1.243,-.232),"★",.00048,Color.WHITE)
 	# Oversized friendly head, broad cheeks and layered eyes.
 	var head:=node(root,Vector3(0,1.52,-.025),"Head")
 	contour(head,Vector3.ZERO,[Vector4(-.322,.001,.001,-.025),Vector4(-.295,.15,.115,-.04),Vector4(-.23,.29,.215,-.018),Vector4(-.13,.365,.284,-.012),Vector4(-.02,.368,.295,0),Vector4(.12,.329,.274,.015),Vector4(.23,.26,.22,.024),Vector4(.30,.12,.12,.02),Vector4(.32,.001,.001,.02)],fur)
