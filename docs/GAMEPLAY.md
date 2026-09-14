@@ -21,3 +21,7 @@ Criterios: velocidad estable entre tasas de cuadros, diagonal normalizada, salto
 ## Prototipo 0.1.0
 
 Implementados los cuatro objetivos del sendero, guardado y locomoción descritos en [fase 1](PHASE1_RESULT.md). Las acciones existentes alimentan el controlador nativo; los adaptadores táctiles siguen pendientes.
+
+## Movimiento 0.1.2
+
+Pausa física incluso en salto, reinicio de pose y piernas de dos segmentos. La animación responde al desplazamiento real. Ver [detalle y límites](MOTION_0_1_2.md).

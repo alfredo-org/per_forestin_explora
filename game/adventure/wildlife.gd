@@ -4,6 +4,7 @@ var player:Node3D
 var home:=Vector3.ZERO
 var state:="grazing"
 var active:=true
+var frozen:=false
 var visual:Node3D
 var gait:=0.0
 var phase:=0.0
@@ -14,6 +15,7 @@ func _ready()->void:
 	visual=Shapes.guanaco();add_child(visual)
 	phase=home.x*0.7
 func _physics_process(delta:float)->void:
+	if frozen:return
 	phase+=delta
 	var direction:=Vector3.ZERO
 	if active and is_instance_valid(player):

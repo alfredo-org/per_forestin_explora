@@ -102,11 +102,11 @@ func start(use_save:bool=false)->void:
 	if not use_save:data=Progress.fresh();landscape.set_night(false)
 	player.reset_to(point(CHECKPOINTS[data.stage])+Vector3.UP*0.2);observed=0;running=true;sync_items();resume();persist();update_hud()
 func resume()->void:
-	paused=false;menu.hide();pause_ui.hide();ending.hide();hud.show();player.set_active(true)
-	for animal in animals:animal.active=true
+	paused=false;player.frozen=false;menu.hide();pause_ui.hide();ending.hide();hud.show();player.set_active(true)
+	for animal in animals:animal.active=true;animal.frozen=false
 func pause()->void:
-	paused=true;player.set_active(false);pause_ui.show()
-	for animal in animals:animal.active=false
+	paused=true;player.frozen=true;player.set_active(false);pause_ui.show()
+	for animal in animals:animal.active=false;animal.frozen=true
 func cycle_quality()->void:
 	var profiles:Array=Quality.PROFILES.keys();quality=profiles[(profiles.find(quality)+1)%profiles.size()];Quality.apply(quality,get_viewport(),player.camera,landscape.sun);landscape.apply_density(quality);quality_button.text="Calidad: "+quality
 func _unhandled_input(event:InputEvent)->void:
@@ -164,8 +164,8 @@ func interact()->bool:
 			return false
 		3:
 			if player.position.distance_to(target())>4:return false
-			advance("Cuaderno de campo completado");paused=true;player.set_active(false);ending.show()
-			for animal in animals:animal.active=false
+			advance("Cuaderno de campo completado");paused=true;player.frozen=true;player.set_active(false);ending.show()
+			for animal in animals:animal.active=false;animal.frozen=true
 		4:return false
 	return true
 func advance(message:String)->void:data.stage=mini(data.stage+1,4);persist();toast(message);play_sound(chime);update_hud()

@@ -94,6 +94,9 @@ def main():
         output = run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--script', 'res://tests/adventure_test.gd', '--', '--no-save'], 'adventure')
         if 'FORESTIN_ADVENTURE_RESULT failures=0' not in output:
             raise RuntimeError('Adventure checks did not pass')
+        output = run_checked([executable, '--headless', '--path', str(ROOT / 'game'), '--script', 'res://tests/motion_test.gd', '--', '--no-save'], 'motion')
+        if 'FORESTIN_MOTION_RESULT failures=0' not in output:
+            raise RuntimeError('Motion checks did not pass')
         if args.command == 'export-windows':
             target = ROOT / 'builds/windows/ForestinAventura.exe'
             target.parent.mkdir(parents=True, exist_ok=True)

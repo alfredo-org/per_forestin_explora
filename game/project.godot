@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Forestín Aventura"
-config/version="0.1.1-patagonia"
+config/version="0.1.2-motion"
 run/main_scene="res://adventure/main.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 
