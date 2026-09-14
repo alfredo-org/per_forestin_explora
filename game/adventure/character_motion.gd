@@ -21,19 +21,20 @@ func update(delta:float,speed:float,grounded:bool,vertical_speed:float,landing:f
 	clock+=delta
 	impact=maxf(landing,impact*exp(-delta*13))
 	blend=lerpf(blend,clampf(speed/3.2,0,1),1-exp(-delta*10))
-	phase=fposmod(phase+speed*delta*TAU/(3.0 if speed>4.2 else 2.2),TAU)
+	var run_blend:=smoothstep(3.2,6.0,speed)
+	phase=fposmod(phase+speed*delta*TAU/lerpf(2.2,3.0,run_blend),TAU)
 	state="land" if impact>.12 else "rise" if not grounded and vertical_speed>0 else "fall" if not grounded else "run" if speed>4.2 else "walk" if blend>.08 else "idle"
 	var crouch:=impact*.085
-	model.position.y=-.025-crouch+(sin(clock*1.8)*.003 if blend<.1 else (1.0-cos(phase*2))*.007)
+	model.position.y=lerpf(.015,-.010,blend)-crouch+(sin(clock*1.8)*.003 if blend<.1 else (1.0-cos(phase*2))*.007)
 	model.rotation.x=lerpf(model.rotation.x,-.045*blend-.07*maxf(speed-3.2,0)/2.8,1-exp(-delta*8))
 	model.rotation.z=sin(phase)*.015*blend
 	for i in range(2):
 		var t:=fposmod(phase/TAU+float(i)*.5,1.0)
 		var swing:=maxf((t-.6)/.4,0)
-		var reach:=.20 if speed<4.2 else .25
+		var reach:=lerpf(.20,.25,run_blend)
 		var foot_z:=lerpf(-reach,reach,t/.6) if t<.6 else lerpf(reach,-reach,smoothstep(0,1,swing))
-		var lift:=sin(swing*PI)*(.11 if speed<4.2 else .16)
-		var drop:=.595-crouch-lift*blend
+		var lift:=sin(swing*PI)*lerpf(.11,.16,run_blend)
+		var drop:=lerpf(.635,.61,blend)-crouch-lift*blend
 		if not grounded:drop=.49 if vertical_speed>0 else .55;foot_z=-.075 if i==0 else .075
 		else:foot_z*=blend
 		var distance:=clampf(Vector2(drop,foot_z).length(),.10,.639)
@@ -43,7 +44,7 @@ func update(delta:float,speed:float,grounded:bool,vertical_speed:float,landing:f
 		joints[4+i].rotation.x=lerpf(joints[4+i].rotation.x,knee,1-exp(-delta*24))
 		joints[6+i].rotation.x=-joints[i].rotation.x-joints[4+i].rotation.x
 		# The same foot trajectory drives the opposite arm; no independent drifting phase.
-		var running:=clampf((speed-3.2)/2.8,0,1)
+		var running:=run_blend
 		var arm_swing:=clampf(foot_z/reach,-1,1)*lerpf(.52,.78,running) if grounded else -.42
 		var side:=-1.0 if i==0 else 1.0
 		joints[2+i].rotation.z=lerpf(joints[2+i].rotation.z,side*(.14+.035*blend),1-exp(-delta*10))

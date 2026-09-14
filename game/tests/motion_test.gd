@@ -27,6 +27,7 @@ func release_controls() -> void:
 		Input.action_release(action)
 
 func run() -> void:
+	check_pose_cycles()
 	var scene = load("res://adventure/main.tscn").instantiate()
 	root.add_child(scene)
 	await frames(4)
@@ -123,3 +124,39 @@ func run() -> void:
 	await frames(3)
 	print("FORESTIN_MOTION_RESULT failures=%d" % failures)
 	quit(1 if failures else 0)
+
+func check_pose_cycles()->void:
+	var model:=preload("res://adventure/forestin_model.gd").build()
+	root.add_child(model)
+	var motion=preload("res://adventure/character_motion.gd").new(model)
+	var ranges:Array[float]=[]
+	for speed in [3.2,6.0]:
+		for frame in range(120):motion.update(1.0/60,speed,true,0,0)
+		var lo:=INF;var hi:=-INF;var opposite:=0
+		for frame in range(180):
+			motion.update(1.0/60,speed,true,0,0)
+			var left:float=model.get_node("ArmL").rotation.x
+			var right:float=model.get_node("ArmR").rotation.x
+			lo=minf(lo,left);hi=maxf(hi,left)
+			if left*right<0:opposite+=1
+		check(hi-lo>.5,"arms swing visibly through the gait cycle")
+		check(opposite>100,"arms alternate in opposition")
+		ranges.append(hi-lo)
+	check(ranges[1]>ranges[0]*1.1,"running increases arm swing")
+	for frame in range(120):motion.update(1.0/60,0,true,0,0)
+	check(absf(model.get_node("ArmL").rotation.x)<.03,"arms settle after stopping")
+	check(absf(model.get_node("LegL/Knee").rotation.x)<.35,"idle knees relax without deep crouch")
+	motion.reset()
+	var early:=0.0;var peak:=0.0
+	for frame in range(630):
+		motion.update(1.0/60,0,true,0,0)
+		if frame<360:early=maxf(early,motion.smile)
+		peak=maxf(peak,motion.smile)
+	check(early<.02,"face starts neutral")
+	check(peak>.8,"occasional smile eases in")
+	check(motion.smile<.05,"smile returns to neutral")
+	motion.clock=7.5
+	for frame in range(30):motion.update(1.0/60,0,true,0,0)
+	motion.reset()
+	check(model.get_node("Head/Mouth").scale.is_equal_approx(Vector3.ONE),"checkpoint resets expression")
+	model.free()

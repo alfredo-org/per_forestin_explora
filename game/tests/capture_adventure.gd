@@ -19,6 +19,10 @@ func run()->void:
 	scene.player.yaw=PI;scene.player.pitch=-0.10
 	scene.player.arm.spring_length=3.5
 	await capture("forestin.png")
+	scene.player.animator.clock=7.3
+	for i in range(45):await physics_frame
+	await capture("forestin-smile.png")
+	scene.player.animator.reset()
 	scene.player.arm.spring_length=5.0
 	scene.player.yaw=0
 	var motion_camera:=Camera3D.new();scene.add_child(motion_camera);motion_camera.current=true

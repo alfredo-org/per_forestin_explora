@@ -43,6 +43,18 @@ static func contour(p:Node3D,pos:Vector3,profile:Array[Vector4],m:Material,fold:
 		for k in range(segments):
 			var a:=j*(segments+1)+k;var b:=a+segments+1
 			for index in [a,a+1,b,a+1,b+1,b]:indices.append(index)
+	# Close each loft at both ends. Duplicate rim normals for a clean fabric edge.
+	for end in [0,rings.size()-1]:
+		var r:Vector4=rings[end]
+		var normal:=Vector3.DOWN if end==0 else Vector3.UP
+		var center:=vertices.size()
+		vertices.append(Vector3(0,r.x,r.w));normals.append(normal);uv.append(Vector2(.5,.5))
+		for k in range(segments+1):
+			vertices.append(vertices[end*(segments+1)+k]);normals.append(normal);uv.append(Vector2.ZERO)
+		for k in range(segments):
+			indices.append(center)
+			indices.append(center+2+k if end==0 else center+1+k)
+			indices.append(center+1+k if end==0 else center+2+k)
 	var arrays:=[];arrays.resize(Mesh.ARRAY_MAX);arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_NORMAL]=normals;arrays[Mesh.ARRAY_TEX_UV]=uv;arrays[Mesh.ARRAY_INDEX]=indices
 	var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	var n:=MeshInstance3D.new();n.mesh=mesh;n.material_override=m;n.position=pos;p.add_child(n);return n
