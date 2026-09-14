@@ -15,7 +15,7 @@ var data:Dictionary
 var running:=false
 var paused:=false
 var no_save:=false
-var quality:="HIGH"
+var quality:="LOW" if OS.has_feature("web") else "HIGH"
 var observed:=0.0
 var toast_time:=0.0
 var ui_time:=0.0

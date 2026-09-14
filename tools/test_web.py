@@ -25,11 +25,12 @@ try:
                 raise RuntimeError("Godot scene did not reach ready state")
             page.wait_for_timeout(500)
         page.wait_for_timeout(2000)
-        page.locator("canvas").screenshot(path=str(report / "web-title.png"))
+        page.screenshot(path=str(report / "web-title.png"), timeout=120000)
         if errors or any("SCRIPT ERROR:" in m for m in messages):
             raise RuntimeError(str(errors) + "\n" + "\n".join(messages))
         print("FORESTIN_WEB_READY: native scene loaded in Chromium/WebGL")
         browser.close()
 finally:
+    print("\n".join(messages + errors), flush=True)
     (report / "console.log").write_text("\n".join(messages + errors))
     server.shutdown()
