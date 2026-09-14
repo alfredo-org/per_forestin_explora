@@ -22,10 +22,12 @@ func run()->void:
 	scene.player.arm.spring_length=5.0
 	scene.player.yaw=0
 	var motion_camera:=Camera3D.new();scene.add_child(motion_camera);motion_camera.current=true
-	motion_camera.global_position=scene.player.global_position+Vector3(3,1.5,-3)
+	motion_camera.global_position=scene.player.global_position+Vector3(3,1.7,-4.5)
 	motion_camera.look_at(scene.player.global_position+Vector3.UP*.95)
 	Input.action_press("move_forward")
 	for i in range(18):await physics_frame
+	motion_camera.global_position=scene.player.global_position+Vector3(3,1.7,-4.5)
+	motion_camera.look_at(scene.player.global_position+Vector3.UP*1.05)
 	await capture("forestin-walk.png")
 	Input.action_release("move_forward")
 	for i in range(45):await physics_frame
@@ -33,6 +35,8 @@ func run()->void:
 	await physics_frame
 	Input.action_release("jump")
 	for i in range(7):await physics_frame
+	motion_camera.global_position=scene.player.global_position+Vector3(3,1.7,-4.5)
+	motion_camera.look_at(scene.player.global_position+Vector3.UP*1.05)
 	await capture("forestin-jump.png")
 	for i in range(90):await physics_frame
 	await capture("forestin-landed.png")
