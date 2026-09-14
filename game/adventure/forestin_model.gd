@@ -82,7 +82,7 @@ static func build()->Node3D:
 	var fur:=mat("e98122");var inner:=mat("bc5017");var muzzle:=mat("ffe0a0")
 	var green:=mat("006344");var seam:=mat("004631");var yellow:=mat("ffca19")
 	var white:=mat("fff9ed",.35);var gold:=mat("edb650",.3);var leather:=mat("a94d21",.5);var sole:=mat("d68035")
-	var dark:=mat("29140c",.35);var mouth:=mat("40110f");var tongue:=mat("e85459");var iris:=mat("934211",.25)
+	var dark:=mat("29140c",.35);var iris:=mat("934211",.25)
 	# Rounded work shirt and overalls. Front of the character is -Z.
 	contour(root,Vector3.ZERO,[Vector4(.76,.22,.205,.025),Vector4(.86,.315,.285,.018),Vector4(1.02,.324,.307,.018),Vector4(1.19,.318,.285,.028),Vector4(1.29,.27,.225,.035),Vector4(1.37,.13,.142,.022),Vector4(1.39,.001,.001,0)],yellow,.009)
 	contour(root,Vector3.ZERO,[Vector4(.64,.16,.16,.022),Vector4(.71,.29,.255,.03),Vector4(.84,.325,.295,.02),Vector4(.93,.321,.304,.016),Vector4(.955,.316,.301,.014)],green,.012)
@@ -138,10 +138,13 @@ static func build()->Node3D:
 		oval(eye,Vector3(-side*.009,-.01,-.084),Vector3(.063,.097,.018),dark)
 		oval(eye,Vector3(-.024,.026,-.098),Vector3(.032,.038,.012),white)
 		var brow:=oval(head,Vector3(side*.154,.205,-.26),Vector3(.19,.058,.05),dark);brow.rotation.z=side*.16
-	oval(head,Vector3(0,-.189,-.253),Vector3(.29,.23,.105),mouth)
-	oval(head,Vector3(0,-.263,-.313),Vector3(.145,.061,.023),tongue)
+	# Closed lips with a curved seam; expression scales the curve, never opens a cavity.
+	var lips:=node(head,Vector3(0,-.18,-.317),"Mouth")
+	for j in range(16):
+		var x0:=lerpf(-.115,.115,float(j)/16)
+		var x1:=lerpf(-.115,.115,float(j+1)/16)
+		line(lips,Vector3(x0,.010*pow(x0/.115,2),.042*pow(x0/.115,2)),Vector3(x1,.010*pow(x1/.115,2),.042*pow(x1/.115,2)),.0035,dark)
 	for side in [-1,1]:
-		oval(head,Vector3(side*.044,-.179,-.322),Vector3(.083,.113,.044),white)
 		oval(head,Vector3(side*.093,-.085,-.305),Vector3(.23,.16,.15),muzzle)
 		for j in range(3):
 			oval(head,Vector3(side*(.12+j*.019),-.067-float(j%2)*.035,-.378+float(j)*.008),Vector3(.008,.008,.006),dark)
