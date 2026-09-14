@@ -65,7 +65,7 @@ static func cloth_panel(p:Node3D,m:Material,left:float,right:float,bottom:float,
 	for j in range(rows):
 		for i in range(cols):
 			var a:=j*(cols+1)+i;var b:=a+cols+1
-			for k in [a,b,a+1,a+1,b,b+1]:
+			for k in [a,a+1,b,a+1,b+1,b]:
 				st.set_smooth_group(0);st.add_vertex(points[k])
 	st.generate_normals()
 	var n:=MeshInstance3D.new();n.mesh=st.commit();n.material_override=m;p.add_child(n)
