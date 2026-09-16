@@ -9,5 +9,5 @@ void fragment(){
  NORMAL_MAP_DEPTH=.6;
  float fresnel=pow(1.0-clamp(dot(normalize(NORMAL),normalize(VIEW)),0.0,1.0),3.0);
  ALBEDO=mix(vec3(.025,.20,.235),vec3(.26,.47,.51),fresnel*.65)+(a*b)*.012;
- ROUGHNESS=.23;METALLIC=.08;SPECULAR=.65;
+ ROUGHNESS=.42;METALLIC=.0;SPECULAR=.25;
 }

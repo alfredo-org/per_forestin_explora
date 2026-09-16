@@ -33,10 +33,10 @@ func _ready()->void:
 	add_child(terrain);terrain.create_trimesh_collision()
 	var sky:=ProceduralSkyMaterial.new();sky.sky_top_color=Color("598da8");sky.sky_horizon_color=Color("ccdce0");sky.ground_horizon_color=Color("c9c7ad");sky.ground_bottom_color=Color("5c6654")
 	environment=Environment.new();environment.background_mode=Environment.BG_SKY;environment.sky=Sky.new();environment.sky.sky_material=sky
-	environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;environment.ambient_light_color=Color("b8d0e0");environment.ambient_light_energy=0.42
+	environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;environment.ambient_light_color=Color("b8d0e0");environment.ambient_light_energy=0.36
 	environment.tonemap_mode=Environment.TONE_MAPPER_FILMIC;environment.fog_enabled=true;environment.fog_density=0.0012;environment.fog_light_color=Color("b3ccd7")
 	var world_env:=WorldEnvironment.new();world_env.environment=environment;add_child(world_env)
-	sun=DirectionalLight3D.new();sun.name="Sun";sun.rotation_degrees=Vector3(-32,-48,0);sun.light_color=Color("fff0d7");sun.light_energy=1.05;sun.shadow_enabled=true;sun.directional_shadow_max_distance=70;add_child(sun)
+	sun=DirectionalLight3D.new();sun.name="Sun";sun.rotation_degrees=Vector3(-32,-48,0);sun.light_color=Color("fff0d7");sun.light_energy=0.82;sun.shadow_enabled=true;sun.directional_shadow_max_distance=70;add_child(sun)
 	var water:=MeshInstance3D.new();var plane:=PlaneMesh.new();plane.size=Vector2(50,140);water.mesh=plane;water.position=Vector3(38,-0.25,-40)
 	var shader:=preload("res://adventure/environment/water.gdshader")
 	var wm:=ShaderMaterial.new();wm.shader=shader;water.material_override=wm;add_child(water)
@@ -87,8 +87,8 @@ func set_night(value:bool)->void:
 	night=value
 	backdrop_material.set_shader_parameter("tint",Color("435978") if value else Color("c4ced1"))
 	environment.fog_light_color=Color("243247") if value else Color("b3ccd7")
-	sun.light_energy=0.20 if value else 1.05;sun.light_color=Color("b1c5ef") if value else Color("fff0d7")
-	environment.ambient_light_energy=0.24 if value else 0.42
+	sun.light_energy=0.20 if value else 0.82;sun.light_color=Color("b1c5ef") if value else Color("fff0d7")
+	environment.ambient_light_energy=0.24 if value else 0.36
 	var sky:ProceduralSkyMaterial=environment.sky.sky_material
 	sky.sky_top_color=Color("09172e") if value else Color("598da8");sky.sky_horizon_color=Color("31455e") if value else Color("ccdce0")
 
