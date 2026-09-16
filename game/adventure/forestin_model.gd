@@ -1,7 +1,7 @@
 extends RefCounted
 ## Forestin reference costume and face, constructed entirely from native 3D geometry.
 static func mat(hex:String,rough:float=.7)->StandardMaterial3D:
-	var m:=StandardMaterial3D.new();m.albedo_color=Color(hex);m.roughness=rough;return m
+	var m:=StandardMaterial3D.new();m.albedo_color=Color(hex);m.roughness=rough;m.metallic_specular=.32;return m
 static func node(p:Node3D,pos:Vector3,name:String)->Node3D:
 	var n:=Node3D.new();n.name=name;n.position=pos;p.add_child(n);return n
 static func oval(p:Node3D,pos:Vector3,size:Vector3,m:Material)->MeshInstance3D:
@@ -12,6 +12,16 @@ static func block(p:Node3D,pos:Vector3,size:Vector3,m:Material)->MeshInstance3D:
 static func line(p:Node3D,a:Vector3,b:Vector3,r:float,m:Material)->void:
 	var n:=MeshInstance3D.new();var s:=CylinderMesh.new();s.top_radius=r;s.bottom_radius=r;s.height=a.distance_to(b);s.radial_segments=8
 	n.mesh=s;n.position=(a+b)*.5;n.quaternion=Quaternion(Vector3.UP,(b-a).normalized());n.material_override=m;p.add_child(n)
+# Bake narrow molded details into one mesh per path, avoiding per-segment draw calls.
+static func rib_path(p:Node3D,points:PackedVector3Array,radius:float,m:Material)->void:
+	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in range(points.size()-1):
+		var a:=points[i];var b:=points[i+1]
+		if a.distance_squared_to(b)<.00000001:continue
+		var cylinder:=CylinderMesh.new();cylinder.top_radius=radius;cylinder.bottom_radius=radius;cylinder.height=a.distance_to(b);cylinder.radial_segments=8
+		var basis:=Basis(Quaternion(Vector3.UP,(b-a).normalized()))
+		st.append_from(cylinder,0,Transform3D(basis,(a+b)*.5))
+	var n:=MeshInstance3D.new();n.mesh=st.commit();n.material_override=m;p.add_child(n)
 static func text3(p:Node3D,pos:Vector3,value:String,size:float,color:Color)->void:
 	var t:=Label3D.new();t.text=value;t.font_size=64;t.pixel_size=size;t.position=pos;t.rotation.y=PI;t.modulate=color;t.outline_size=0;t.no_depth_test=false;p.add_child(t)
 # Lofted contour surfaces: each garment/head is one indexed, smooth-normal mesh.
@@ -65,15 +75,20 @@ static func chest_front(x:float,y:float)->float:
 		var t:=clampf((y-1.02)/.27,0,1)
 		width=lerpf(.324,.27,t);depth=lerpf(.307,.225,t);center=lerpf(.018,.035,t)
 	return center-depth*sqrt(maxf(.01,1.0-pow(x/width,2)))-.013
-static func cloth_panel(p:Node3D,m:Material,left:float,right:float,bottom:float,top:float,taper:float)->void:
+static func cloth_panel(p:Node3D,m:Material,left:float,right:float,bottom:float,top:float,taper:float,offset:float=0.0,rounded:bool=false)->void:
 	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var cols:=16;var rows:=16
 	var points:Array[Vector3]=[]
 	for j in range(rows+1):
 		var v:=float(j)/rows;var y:=lerpf(bottom,top,v)
 		for i in range(cols+1):
-			var x:=lerpf(left,right,float(i)/cols)*lerpf(1.0,taper,v)
-			points.append(Vector3(x,y,chest_front(x,y)))
+			var edge:=1.0
+			if rounded:
+				# Pocket corners curve into the garment instead of forming a box.
+				var corner:=clampf((absf(v-.5)-.34)/.16,0.0,1.0)
+				edge=1.0-.17*(1.0-sqrt(maxf(0.0,1.0-corner*corner)))
+			var x:=(lerpf(left,right,float(i)/cols)-(left+right)*.5)*edge*lerpf(1.0,taper,v)+(left+right)*.5
+			points.append(Vector3(x,y,chest_front(x,y)-offset))
 	for j in range(rows):
 		for i in range(cols):
 			var a:=j*(cols+1)+i;var b:=a+cols+1
@@ -93,15 +108,15 @@ static func build()->Node3D:
 	var root:=Node3D.new();root.name="Forestin"
 	var fur:=mat("e98122");var inner:=mat("bc5017");var muzzle:=mat("ffe0a0")
 	var green:=mat("006344");var seam:=mat("004631");var yellow:=mat("ffca19")
-	var white:=mat("fff9ed",.35);var gold:=mat("edb650",.3);var leather:=mat("a94d21",.5);var sole:=mat("d68035")
+	var white:=mat("fff9ed",.47);var gold:=mat("edb650",.38);var leather:=mat("a94d21",.68);var sole:=mat("b96f34",.86)
 	var dark:=mat("29140c",.35);var iris:=mat("934211",.25)
 	# Rounded work shirt and overalls. Front of the character is -Z.
 	contour(root,Vector3.ZERO,[Vector4(.76,.22,.205,.025),Vector4(.86,.315,.285,.018),Vector4(1.02,.324,.307,.018),Vector4(1.19,.318,.285,.028),Vector4(1.29,.27,.225,.035),Vector4(1.37,.13,.142,.022),Vector4(1.39,.001,.001,0)],yellow,.009)
 	contour(root,Vector3.ZERO,[Vector4(.64,.16,.16,.022),Vector4(.71,.29,.255,.03),Vector4(.84,.325,.295,.02),Vector4(.93,.321,.304,.016),Vector4(.955,.316,.301,.014)],green,.012)
 	bib(root,green)
-	block(root,Vector3(0,.94,-.305),Vector3(.29,.20,.025),seam)
-	oval(root,Vector3(0,.94,-.326),Vector3(.28,.21,.035),green)
-	text3(root,Vector3(0,.95,-.347),"CONAF",.00062,Color.WHITE)
+	cloth_panel(root,seam,-.151,.151,.858,1.052,1.0,.003,true)
+	cloth_panel(root,green,-.144,.144,.865,1.046,1.0,.005,true)
+	text3(root,Vector3(0,.95,-.329),"CONAF",.00062,Color.WHITE)
 	for side in [-1,1]:
 		strap(root,float(side),green)
 		block(root,Vector3(side*.215,1.195,-.203),Vector3(.092,.061,.022),gold)
@@ -116,9 +131,11 @@ static func build()->Node3D:
 		block(leg,Vector3(side*.085,-.17,-.157),Vector3(.115,.17,.03),green)
 		oval(leg,Vector3(side*.085,-.11,-.183),Vector3(.035,.035,.015),gold)
 		var ankle:=node(knee,Vector3(0,-.32,0),"Ankle")
-		oval(ankle,Vector3(0,.035,-.027),Vector3(.23,.27,.29),leather)
-		oval(ankle,Vector3(0,-.012,-.09),Vector3(.29,.20,.43),leather)
-		oval(ankle,Vector3(0,-.087,-.082),Vector3(.31,.072,.45),sole)
+		# One flowing leather upper: broad toe, arched instep, narrower ankle.
+		contour(ankle,Vector3.ZERO,[Vector4(-.068,.137,.197,-.080),Vector4(-.042,.144,.204,-.083),Vector4(.004,.139,.194,-.083),Vector4(.046,.123,.158,-.068),Vector4(.098,.111,.132,-.033),Vector4(.160,.107,.119,-.013)],leather)
+		# Shaped outsole and a thin welt follow the same footprint.
+		contour(ankle,Vector3.ZERO,[Vector4(-.116,.136,.203,-.080),Vector4(-.106,.151,.219,-.080),Vector4(-.077,.153,.221,-.080),Vector4(-.065,.144,.210,-.080)],sole)
+		contour(ankle,Vector3.ZERO,[Vector4(-.072,.145,.211,-.080),Vector4(-.061,.146,.211,-.080),Vector4(-.056,.140,.204,-.080)],leather)
 		for j in range(4):
 			for s in [-1,1]:
 				block(ankle,Vector3(s*.132,-.107,-.23+j*.092),Vector3(.036,.037,.04),dark)
@@ -163,11 +180,24 @@ static func build()->Node3D:
 			line(head,Vector3(side*.17,-.087,-.363),Vector3(side*.40,-.015-j*.058,-.31),.002,white)
 	oval(head,Vector3(0,-.043,-.392),Vector3(.162,.104,.096),dark)
 	oval(head,Vector3(-.028,-.014,-.435),Vector3(.045,.021,.007),mat("865749",.3))
-	# White safety helmet, brim, raised ribs and front wordmark.
-	contour(head,Vector3.ZERO,[Vector4(.145,.422,.35,.01),Vector4(.20,.416,.345,.014),Vector4(.30,.373,.314,.02),Vector4(.395,.295,.255,.03),Vector4(.456,.16,.145,.035),Vector4(.475,.001,.001,.035)],white)
-	oval(head,Vector3(0,.144,-.045),Vector3(.91,.058,.82),white)
-	for x in [-.24,0,.24]:
-		oval(head,Vector3(x,.40,.016),Vector3(.055,.17,.48),white)
+	# White safety helmet: continuous shell, thin shaped brim and low molded ribs.
+	var helmet_profile:Array[Vector4]=[Vector4(.145,.422,.35,.01),Vector4(.20,.416,.345,.014),Vector4(.30,.373,.314,.02),Vector4(.395,.295,.255,.03),Vector4(.456,.16,.145,.035),Vector4(.475,.001,.001,.035)]
+	contour(head,Vector3.ZERO,helmet_profile,white)
+	contour(head,Vector3.ZERO,[Vector4(.123,.410,.356,-.020),Vector4(.133,.448,.395,-.025),Vector4(.149,.450,.397,-.025),Vector4(.160,.422,.352,.01)],white)
+	# Sample the same shell loft for shallow molded ribs with no floating pieces.
+	for side in [-1,0,1]:
+		for front in [-1,1]:
+			var points:=PackedVector3Array()
+			for i in range(helmet_profile.size()-1):
+				var a:Vector4=helmet_profile[maxi(i-1,0)];var b:Vector4=helmet_profile[i]
+				var c:Vector4=helmet_profile[i+1];var d:Vector4=helmet_profile[mini(i+2,helmet_profile.size()-1)]
+				for j in range(6):
+					var t:=float(j)/6.0
+					var r:Vector4=(2*b+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t)*.5
+					var fraction:=float(side)*.44
+					var point:=Vector3(r.y*fraction,r.x,r.w+float(front)*r.z*sqrt(1.0-fraction*fraction))
+					points.append(point)
+			rib_path(head,points,.005,white)
 	text3(head,Vector3(0,.282,-.335),"Forestín",.0010,Color("005739"))
 	var leaf:=oval(head,Vector3(.131,.35,-.29),Vector3(.025,.058,.012),mat("63ae3c"));leaf.rotation.z=-.35
 	return root

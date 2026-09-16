@@ -9,8 +9,8 @@ void fragment(){
  float broad=noise(p*.19)*.65+noise(p*.7)*.35;
  float fine=noise(p*17.0);
  float stone=smoothstep(.72,.90,noise(p*6.0));
- vec3 meadow=mix(vec3(.075,.10,.042),vec3(.20,.19,.075),broad);
- vec3 dirt=mix(vec3(.23,.18,.105),vec3(.34,.28,.17),noise(p*1.9));
+ vec3 meadow=mix(vec3(.105,.16,.048),vec3(.26,.29,.12),broad);
+ vec3 dirt=mix(vec3(.28,.23,.15),vec3(.43,.36,.24),noise(p*1.9));
  float trail=1.0-smoothstep(.9,2.1,UV2.x+(noise(p*2.0)-.5)*.45);
  ALBEDO=mix(meadow,dirt,trail)*(0.88+fine*.22);
  ALBEDO=mix(ALBEDO,vec3(.30,.29,.25),stone*.24);
