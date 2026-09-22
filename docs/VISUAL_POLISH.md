@@ -17,3 +17,11 @@ Limits: this remains a procedural stylized character. Clothing deformation, foot
 Each sleeve is now one skinned mesh with a torso anchor and blended upper-arm/forearm influences, driven by the existing animation joints. The wrist follows the same elbow transform as the hand. Shoulder pivots sit closer to the torso, and cuffs use a shallow continuous contour. Clothing uses a matte shader with fine weave faded by screen-space derivatives to avoid distant shimmer.
 
 Regression checks cover normalized packed skin weights (16-bit quantization tolerance), inverse bind transforms, left/right elbow poses under a transformed character, and existing walk/run/pause/checkpoint behavior. Real rendering and web export are checked by CI; target-device FPS remains unmeasured. The torso and sleeves remain separate meshes at the garment seam; this is not a full-body production rig or cloth simulation.
+
+## Legs and ground contact — September 22
+
+- Continuous skinned trouser legs blend thigh and shin across the knee; existing boots and animation paths remain intact.
+- Stance travel now matches measured character displacement. Shorter stride cycles fit the character's leg length; arm response follows the faster cadence.
+- Two downward physics probes adjust foot height and sole orientation on walkable surfaces. Player collision and jump physics are unchanged. Checkpoint reset clears ankle corrections.
+- Deterministic flat-ground walk regression: mean stance drift 0.000452 m/frame, maximum sole height error 0.000143 m over 95 samples at 60 Hz and 3.2 m/s. This is a synthetic straight-line test, not a claim about every terrain or turn. Slope-normal and existing motion/pause/collision checks also pass.
+- CI now captures running as well as walking and jumping. Remaining limits: no persistent world-space foot lock through sharp turns, no toe articulation, and steep terrain can exceed leg reach. Hardware FPS has not been measured.

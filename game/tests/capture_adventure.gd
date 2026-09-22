@@ -33,6 +33,12 @@ func run()->void:
 	motion_camera.global_position=scene.player.global_position+Vector3(3,1.7,-4.5)
 	motion_camera.look_at(scene.player.global_position+Vector3.UP*1.05)
 	await capture("forestin-walk.png")
+	Input.action_press("sprint")
+	for i in range(18):await physics_frame
+	motion_camera.global_position=scene.player.global_position+Vector3(3,1.7,-4.5)
+	motion_camera.look_at(scene.player.global_position+Vector3.UP*1.05)
+	await capture("forestin-run.png")
+	Input.action_release("sprint")
 	Input.action_release("move_forward")
 	for i in range(45):await physics_frame
 	Input.action_press("jump")

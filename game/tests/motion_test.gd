@@ -27,6 +27,7 @@ func release_controls() -> void:
 		Input.action_release(action)
 
 func run() -> void:
+	check_foot_contact()
 	check_pose_cycles()
 	var scene = load("res://adventure/main.tscn").instantiate()
 	root.add_child(scene)
@@ -164,15 +165,15 @@ func check_pose_cycles()->void:
 
 func check_garment(model:Node3D)->void:
 	var rig:Skeleton3D=model.get_node("GarmentRig")
-	for name in ["SleeveL","SleeveR"]:
+	for name in ["SleeveL","SleeveR","TrousersL","TrousersR"]:
 		var mesh:MeshInstance3D=model.get_node(name)
 		var arrays:=mesh.mesh.surface_get_arrays(0)
 		var weights:PackedFloat32Array=arrays[Mesh.ARRAY_WEIGHTS]
 		var valid:bool=weights.size()==arrays[Mesh.ARRAY_VERTEX].size()*4
 		for i in range(0,weights.size(),4):
 			valid=valid and absf(weights[i]+weights[i+1]+weights[i+2]+weights[i+3]-1.0)<.0001
-		check(valid,"normalized sleeve skin weights: "+name)
-		check(mesh.get_node(mesh.skeleton)==rig,"sleeve resolves its skeleton: "+name)
+		check(valid,"normalized garment skin weights: "+name)
+		check(mesh.get_node(mesh.skeleton)==rig,"garment resolves its skeleton: "+name)
 	for i in range(rig.get_bone_count()):
 		check((rig.get_bone_rest(i)*rig.garment_skin.get_bind_pose(i)).is_equal_approx(Transform3D.IDENTITY),"skin inverse bind preserves rest pose")
 	model.position=Vector3(4,2,-3);model.rotation.y=.7
@@ -185,3 +186,35 @@ func check_garment(model:Node3D)->void:
 		check(rig.get_bone_pose(index).is_equal_approx(arm.transform*elbow.transform),"sleeve follows elbow in model space: "+side)
 		arm.rotation=Vector3.ZERO;elbow.rotation=Vector3.ZERO
 	model.transform=Transform3D.IDENTITY;rig.sync_pose()
+
+func flat_probe(point:Vector3)->Dictionary:
+	return {"position":Vector3(point.x,0,point.z),"normal":Vector3.UP}
+func slope_probe(point:Vector3)->Dictionary:
+	return {"position":Vector3(point.x,.15*point.x+.1*point.z,point.z),"normal":Vector3(-.15,1,-.1).normalized()}
+func check_foot_contact()->void:
+	var carrier:=Node3D.new();root.add_child(carrier)
+	var model:=preload("res://adventure/forestin_model.gd").build();carrier.add_child(model)
+	var motion=preload("res://adventure/character_motion.gd").new(model)
+	var ankle:Node3D=model.get_node("LegL/Knee/Ankle")
+	var previous:=Vector3.ZERO;var prior_stance:=false;var slip:=0.0;var contacts:=0;var height_error:=0.0
+	for frame in range(360):
+		carrier.position.z-=3.2/60.0
+		motion.update(1.0/60,3.2,true,0,0,flat_probe)
+		var sole:=ankle.to_global(Vector3(0,-.116,0))
+		var t:float=motion.phase/TAU
+		var planted:bool=t>.06 and t<.48 and frame>100
+		if planted and prior_stance:
+			slip+=Vector2(sole.x-previous.x,sole.z-previous.z).length();contacts+=1
+			height_error=maxf(height_error,absf(sole.y))
+		previous=sole;prior_stance=planted
+	print("FOOT_CONTACT_METRICS mean_drift_m=%.6f max_height_error_m=%.6f samples=%d" % [slip/maxi(1,contacts),height_error,contacts])
+	check(contacts>40 and slip/maxi(1,contacts)<.012,"stance foot drift below 12 mm per frame at walking speed")
+	check(height_error<.025,"stance sole stays within 25 mm of flat ground")
+	carrier.position=Vector3.ZERO;motion.reset()
+	for frame in range(120):motion.update(1.0/60,0,true,0,0,slope_probe)
+	for path in ["LegL/Knee/Ankle","LegR/Knee/Ankle"]:
+		var boot:Node3D=model.get_node(path)
+		check(boot.global_basis.y.normalized().dot(Vector3(-.15,1,-.1).normalized())>.995,"boot follows terrain normal: "+path)
+	motion.reset()
+	check(ankle.rotation.is_zero_approx(),"checkpoint clears terrain foot correction")
+	carrier.free()

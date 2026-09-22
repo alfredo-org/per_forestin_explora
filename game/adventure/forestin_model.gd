@@ -127,9 +127,7 @@ static func build()->Node3D:
 		oval(root,Vector3(side*.205,1.08,-.235),Vector3(.051,.051,.022),gold)
 		var collar:=block(root,Vector3(side*.085,1.31,-.209),Vector3(.13,.095,.05),yellow);collar.rotation.z=side*.40
 		var leg:=node(root,Vector3(side*.18,.74,.01),"LegL" if side<0 else "LegR")
-		contour(leg,Vector3.ZERO,[Vector4(-.36,.118,.145,0),Vector4(-.30,.13,.156,0),Vector4(-.18,.151,.184,.008),Vector4(-.03,.162,.199,.014),Vector4(.055,.128,.155,.014)],green,.017)
 		var knee:=node(leg,Vector3(0,-.32,0),"Knee")
-		contour(knee,Vector3.ZERO,[Vector4(-.27,.126,.14,0),Vector4(-.235,.131,.152,0),Vector4(-.19,.13,.155,.012),Vector4(-.08,.137,.164,.012),Vector4(.025,.126,.154,0)],green,.023)
 		oval(knee,Vector3(0,-.225,-.005),Vector3(.28,.09,.31),seam)
 		block(leg,Vector3(side*.085,-.17,-.157),Vector3(.115,.17,.03),green)
 		oval(leg,Vector3(side*.085,-.11,-.183),Vector3(.035,.035,.015),gold)
@@ -225,4 +223,21 @@ static func build()->Node3D:
 		sleeve.mesh=mesh;sleeve.skin=rig.garment_skin;sleeve.skeleton=NodePath("../GarmentRig")
 		# Includes the complete walk/run/jump envelope, avoiding rest-pose culling.
 		sleeve.custom_aabb=AABB(Vector3(-.8,.4,-.65),Vector3(1.6,1.25,1.3))
+	for side in [-1,1]:
+		var leg:Node3D=root.get_node("LegL" if side<0 else "LegR")
+		var trousers:=contour(root,Vector3.ZERO,[Vector4(-.59,.125,.14,0),Vector4(-.54,.130,.151,.004),Vector4(-.43,.132,.154,.008),Vector4(-.32,.127,.150,.006),Vector4(-.23,.140,.169,.008),Vector4(-.12,.155,.19,.012),Vector4(-.03,.162,.199,.014),Vector4(.055,.128,.155,.014)],green,.019)
+		trousers.name="TrousersL" if side<0 else "TrousersR"
+		var arrays:=trousers.mesh.surface_get_arrays(0)
+		var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+		var bones:=PackedInt32Array();var weights:=PackedFloat32Array()
+		var upper:=5 if side<0 else 7
+		for i in range(vertices.size()):
+			var lower:=1.0-smoothstep(-.41,-.23,vertices[i].y)
+			vertices[i]=leg.transform*vertices[i]
+			bones.append_array(PackedInt32Array([upper,upper+1,0,0]))
+			weights.append_array(PackedFloat32Array([1.0-lower,lower,0,0]))
+		arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_BONES]=bones;arrays[Mesh.ARRAY_WEIGHTS]=weights
+		var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+		trousers.mesh=mesh;trousers.skin=rig.garment_skin;trousers.skeleton=NodePath("../GarmentRig")
+		trousers.custom_aabb=AABB(Vector3(-.65,-.15,-.7),Vector3(1.3,1.15,1.4))
 	return root

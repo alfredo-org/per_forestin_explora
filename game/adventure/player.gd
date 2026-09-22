@@ -66,5 +66,11 @@ func _physics_process(delta:float)->void:
 	var planar:=Vector2(global_position.x-before_move.x,global_position.z-before_move.z).length()/delta
 	if planar>0.12:visual.rotation.y=lerp_angle(visual.rotation.y,atan2(-velocity.x,-velocity.z),1-exp(-delta*12))
 	var landing:=clampf(-falling_speed/10,0,1) if is_on_floor() and not was_grounded and falling_speed< -2 else 0.0
-	animator.update(delta,planar,is_on_floor(),velocity.y,landing)
+	animator.update(delta,planar,is_on_floor(),velocity.y,landing,probe_foot)
 	was_grounded=is_on_floor()
+
+func probe_foot(world_point:Vector3)->Dictionary:
+	var query:=PhysicsRayQueryParameters3D.create(world_point+Vector3.UP*.55,world_point-Vector3.UP*.65,1|4,[get_rid()])
+	var hit:=get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty() and (hit.normal as Vector3).y>=cos(floor_max_angle):return hit
+	return {}

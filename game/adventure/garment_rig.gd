@@ -4,7 +4,7 @@ extends Skeleton3D
 var drivers:Array[Node3D]=[]
 var garment_skin:=Skin.new()
 func configure(model:Node3D)->void:
-	for path in [".","ArmL","ArmL/Elbow","ArmR","ArmR/Elbow"]:
+	for path in [".","ArmL","ArmL/Elbow","ArmR","ArmR/Elbow","LegL","LegL/Knee","LegR","LegR/Knee"]:
 		var driver:Node3D=model.get_node(path)
 		drivers.append(driver)
 		var index:=get_bone_count()
@@ -15,7 +15,7 @@ func configure(model:Node3D)->void:
 	sync_pose()
 func driver_transform(index:int)->Transform3D:
 	if index==0:return Transform3D.IDENTITY
-	if index==2 or index==4:return drivers[index-1].transform*drivers[index].transform
+	if index in [2,4,6,8]:return drivers[index-1].transform*drivers[index].transform
 	return drivers[index].transform
 func sync_pose()->void:
 	for i in range(drivers.size()):
