@@ -60,6 +60,13 @@ func run()->void:
 	wildlife_camera.global_position=animal.global_position+Vector3(3,1.8,4.5)
 	wildlife_camera.look_at(animal.global_position+Vector3.UP*1.2)
 	await capture("guanaco.png")
+	var mountain_camera:=Camera3D.new();scene.add_child(mountain_camera);mountain_camera.current=true
+	mountain_camera.global_position=Vector3(-2,28,-98)
+	mountain_camera.look_at(Vector3(-2,36,-183))
+	await capture("torres-front.png")
+	mountain_camera.global_position=Vector3(66,32,-125)
+	mountain_camera.look_at(Vector3(-2,35,-183))
+	await capture("torres-side.png")
 	var report:={"renderer":"OpenGL software CI", "resolution":"1280x720", "target_gpu_tested":false, "visible_objects":Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME), "draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), "primitives":Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME), "nodes":get_node_count(), "views":views, "target_fps":"not measured"}
 	var file:=FileAccess.open("res://../builds/reports/render-metrics.json",FileAccess.WRITE);file.store_string(JSON.stringify(report,"  "));file.close()
 	scene.queue_free()

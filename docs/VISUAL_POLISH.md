@@ -25,3 +25,9 @@ Regression checks cover normalized packed skin weights (16-bit quantization tole
 - Two downward physics probes adjust foot height and sole orientation on walkable surfaces. Player collision and jump physics are unchanged. Checkpoint reset clears ankle corrections.
 - Deterministic flat-ground walk regression: mean stance drift 0.000452 m/frame, maximum sole height error 0.000143 m over 95 samples at 60 Hz and 3.2 m/s. This is a synthetic straight-line test, not a claim about every terrain or turn. Slope-normal and existing motion/pause/collision checks also pass.
 - CI now captures running as well as walking and jumping. Remaining limits: no persistent world-space foot lock through sharp turns, no toe articulation, and steep terrain can exceed leg reach. Hardware FPS has not been measured.
+
+## Torres del Paine skyline — September 22
+
+Replaced the active flat photo backdrop with three volumetric procedural granite towers and a shared scree apron. The original texture remains in source history/assets but is no longer displayed. Each tower has an independently authored height/width, asymmetric contour, longitudinal ribs and coherent surface noise. A granite shader adds vertical weathering, tonal variation and snow limited by height and surface slope. Native day/night lighting now affects the entire landmark.
+
+The four added meshes total approximately 61,000 triangles and four material submissions before engine passes. No transparent skyline edges or billboard orientation are used. Added front and side renderer captures for silhouette and depth review. This is a stylized artistic interpretation, not surveyed terrain or a geographically accurate digital twin. These distant meshes are scenery outside the playable route, not climbable terrain. Hardware performance remains unmeasured.

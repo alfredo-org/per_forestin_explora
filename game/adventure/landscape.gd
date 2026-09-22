@@ -4,7 +4,6 @@ const Shapes=preload("res://adventure/shapes.gd")
 const PATH:=[Vector2(0,14),Vector2(0,0),Vector2(-10,-22),Vector2(-1,-44),Vector2(-3,-61),Vector2(-8,-82)]
 var sun:DirectionalLight3D
 var environment:Environment
-var backdrop_material:ShaderMaterial
 var leaf_multimeshes:Array[MultiMesh]=[]
 var grass_mesh:MultiMesh
 var night:=false
@@ -40,10 +39,7 @@ func _ready()->void:
 	var water:=MeshInstance3D.new();var plane:=PlaneMesh.new();plane.size=Vector2(50,140);water.mesh=plane;water.position=Vector3(38,-0.25,-40)
 	var shader:=preload("res://adventure/environment/water.gdshader")
 	var wm:=ShaderMaterial.new();wm.shader=shader;water.material_override=wm;add_child(water)
-	var backdrop:=MeshInstance3D.new();var quad:=QuadMesh.new();quad.size=Vector2(140,93);backdrop.mesh=quad;backdrop.position=Vector3(-2,27,-170)
-	backdrop_material=ShaderMaterial.new();backdrop_material.shader=preload("res://adventure/environment/backdrop.gdshader")
-	backdrop_material.set_shader_parameter("landscape_texture",load("res://assets/environment/torres.png"))
-	backdrop.material_override=backdrop_material;backdrop.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;add_child(backdrop)
+	preload("res://adventure/environment/torres.gd").build(self)
 	build_ridges()
 	var rng:=RandomNumberGenerator.new();rng.seed=381
 	var rockmat:=ShaderMaterial.new();rockmat.shader=preload("res://adventure/environment/rock.gdshader")
@@ -85,7 +81,6 @@ func _ready()->void:
 	var gm:=ShaderMaterial.new();gm.shader=gs;grassnode.material_override=gm;grassnode.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;add_child(grassnode)
 func set_night(value:bool)->void:
 	night=value
-	backdrop_material.set_shader_parameter("tint",Color("435978") if value else Color("c4ced1"))
 	environment.fog_light_color=Color("243247") if value else Color("b3ccd7")
 	sun.light_energy=0.20 if value else 0.82;sun.light_color=Color("b1c5ef") if value else Color("fff0d7")
 	environment.ambient_light_energy=0.24 if value else 0.36
