@@ -11,3 +11,9 @@ Procedural geometry and shaders; no generated bitmap assets.
 Validation: local Godot 4.5.1 import and native validation passed, including adventure, save, collision and motion checks. The commit triggers actual software OpenGL captures and browser export checks in CI. Those captures must be reviewed separately; headless tests do not establish visual quality or hardware performance.
 
 Limits: this remains a procedural stylized character. Clothing deformation, foot planting and production character topology still need further art and animation work. Higher foliage geometry needs real-device performance testing.
+
+## Continuous sleeves — September 22
+
+Each sleeve is now one skinned mesh with a torso anchor and blended upper-arm/forearm influences, driven by the existing animation joints. The wrist follows the same elbow transform as the hand. Shoulder pivots sit closer to the torso, and cuffs use a shallow continuous contour. Clothing uses a matte shader with fine weave faded by screen-space derivatives to avoid distant shimmer.
+
+Regression checks cover normalized packed skin weights (16-bit quantization tolerance), inverse bind transforms, left/right elbow poses under a transformed character, and existing walk/run/pause/checkpoint behavior. Real rendering and web export are checked by CI; target-device FPS remains unmeasured. The torso and sleeves remain separate meshes at the garment seam; this is not a full-body production rig or cloth simulation.

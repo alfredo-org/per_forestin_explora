@@ -128,6 +128,7 @@ func run() -> void:
 func check_pose_cycles()->void:
 	var model:=preload("res://adventure/forestin_model.gd").build()
 	root.add_child(model)
+	check_garment(model)
 	var motion=preload("res://adventure/character_motion.gd").new(model)
 	var ranges:Array[float]=[]
 	for speed in [3.2,6.0]:
@@ -160,3 +161,27 @@ func check_pose_cycles()->void:
 	motion.reset()
 	check(model.get_node("Head/Mouth").scale.is_equal_approx(Vector3.ONE),"checkpoint resets expression")
 	model.free()
+
+func check_garment(model:Node3D)->void:
+	var rig:Skeleton3D=model.get_node("GarmentRig")
+	for name in ["SleeveL","SleeveR"]:
+		var mesh:MeshInstance3D=model.get_node(name)
+		var arrays:=mesh.mesh.surface_get_arrays(0)
+		var weights:PackedFloat32Array=arrays[Mesh.ARRAY_WEIGHTS]
+		var valid:bool=weights.size()==arrays[Mesh.ARRAY_VERTEX].size()*4
+		for i in range(0,weights.size(),4):
+			valid=valid and absf(weights[i]+weights[i+1]+weights[i+2]+weights[i+3]-1.0)<.0001
+		check(valid,"normalized sleeve skin weights: "+name)
+		check(mesh.get_node(mesh.skeleton)==rig,"sleeve resolves its skeleton: "+name)
+	for i in range(rig.get_bone_count()):
+		check((rig.get_bone_rest(i)*rig.garment_skin.get_bind_pose(i)).is_equal_approx(Transform3D.IDENTITY),"skin inverse bind preserves rest pose")
+	model.position=Vector3(4,2,-3);model.rotation.y=.7
+	for side in ["L","R"]:
+		var arm:Node3D=model.get_node("Arm"+side)
+		var elbow:Node3D=arm.get_node("Elbow")
+		arm.rotation=Vector3(.65,.08,.14);elbow.rotation.x=-.9
+		rig.sync_pose()
+		var index:=2 if side=="L" else 4
+		check(rig.get_bone_pose(index).is_equal_approx(arm.transform*elbow.transform),"sleeve follows elbow in model space: "+side)
+		arm.rotation=Vector3.ZERO;elbow.rotation=Vector3.ZERO
+	model.transform=Transform3D.IDENTITY;rig.sync_pose()

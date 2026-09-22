@@ -2,6 +2,9 @@ extends RefCounted
 ## Forestin reference costume and face, constructed entirely from native 3D geometry.
 static func mat(hex:String,rough:float=.7)->StandardMaterial3D:
 	var m:=StandardMaterial3D.new();m.albedo_color=Color(hex);m.roughness=rough;m.metallic_specular=.32;return m
+static func fabric(hex:String)->ShaderMaterial:
+	var m:=ShaderMaterial.new();m.shader=preload("res://adventure/cloth.gdshader")
+	m.set_shader_parameter("fabric_color",Color(hex));return m
 static func node(p:Node3D,pos:Vector3,name:String)->Node3D:
 	var n:=Node3D.new();n.name=name;n.position=pos;p.add_child(n);return n
 static func oval(p:Node3D,pos:Vector3,size:Vector3,m:Material)->MeshInstance3D:
@@ -107,7 +110,7 @@ static func strap(p:Node3D,side:float,m:Material)->void:
 static func build()->Node3D:
 	var root:=Node3D.new();root.name="Forestin"
 	var fur:=mat("e98122");var inner:=mat("bc5017");var muzzle:=mat("ffe0a0")
-	var green:=mat("006344");var seam:=mat("004631");var yellow:=mat("ffca19")
+	var green:=fabric("006344");var seam:=fabric("004631");var yellow:=fabric("efb622")
 	var white:=mat("fff9ed",.47);var gold:=mat("edb650",.38);var leather:=mat("a94d21",.68);var sole:=mat("b96f34",.86)
 	var dark:=mat("29140c",.35);var iris:=mat("934211",.25)
 	# Rounded work shirt and overalls. Front of the character is -Z.
@@ -140,11 +143,9 @@ static func build()->Node3D:
 			for s in [-1,1]:
 				block(ankle,Vector3(s*.132,-.107,-.23+j*.092),Vector3(.036,.037,.04),dark)
 			line(ankle,Vector3(-.065,.116-j*.015,-.065-j*.030),Vector3(.065,.10-j*.015,-.094-j*.030),.007,gold)
-		var arm:=node(root,Vector3(side*.367,1.20,.02),"ArmL" if side<0 else "ArmR")
-		contour(arm,Vector3(side*.018,0,0),[Vector4(-.25,.098,.121,0),Vector4(-.16,.123,.142,0),Vector4(-.035,.145,.163,.01),Vector4(.055,.113,.135,.01),Vector4(.092,.001,.001,0)],yellow,.016)
+		var arm:=node(root,Vector3(side*.335,1.22,.02),"ArmL" if side<0 else "ArmR")
 		var elbow:=node(arm,Vector3(side*.035,-.22,0),"Elbow")
-		contour(elbow,Vector3.ZERO,[Vector4(-.174,.099,.112,0),Vector4(-.135,.109,.124,0),Vector4(-.065,.12,.135,.008),Vector4(.034,.102,.121,0)],yellow,.023)
-		oval(elbow,Vector3(0,-.15,0),Vector3(.24,.065,.255),yellow)
+		contour(elbow,Vector3.ZERO,[Vector4(-.185,.097,.112,0),Vector4(-.176,.111,.123,0),Vector4(-.151,.112,.124,0),Vector4(-.143,.105,.118,0)],yellow)
 		oval(elbow,Vector3(0,-.232,-.025),Vector3(.222,.215,.215),fur)
 		oval(elbow,Vector3(-side*.082,-.208,-.06),Vector3(.095,.12,.10),fur)
 		for finger in range(3):
@@ -200,4 +201,28 @@ static func build()->Node3D:
 			rib_path(head,points,.005,white)
 	text3(head,Vector3(0,.282,-.335),"Forestín",.0010,Color("005739"))
 	var leaf:=oval(head,Vector3(.131,.35,-.29),Vector3(.025,.058,.012),mat("63ae3c"));leaf.rotation.z=-.35
+	var rig:=preload("res://adventure/garment_rig.gd").new();rig.name="GarmentRig";root.add_child(rig);rig.configure(root)
+	for side in [-1,1]:
+		var arm:Node3D=root.get_node("ArmL" if side<0 else "ArmR")
+		# A single surface flows from the shoulder into the wrist; folds are part of the mesh.
+		var sleeve:=contour(root,Vector3.ZERO,[Vector4(-.395,.096,.110,0),Vector4(-.35,.106,.122,.002),Vector4(-.27,.112,.129,.005),Vector4(-.20,.116,.135,.008),Vector4(-.11,.133,.150,.009),Vector4(-.015,.139,.158,.008),Vector4(.065,.101,.124,.006),Vector4(.112,.026,.040,.004),Vector4(.12,.001,.001,.004)],yellow,.014)
+		sleeve.name="SleeveL" if side<0 else "SleeveR"
+		var arrays:=sleeve.mesh.surface_get_arrays(0)
+		var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+		var bones:=PackedInt32Array();var weights:=PackedFloat32Array()
+		var upper:=1 if side<0 else 3
+		for i in range(vertices.size()):
+			var p:=vertices[i]
+			var lower_weight:=1.0-smoothstep(-.30,-.15,p.y)
+			var torso_weight:=smoothstep(.015,.105,p.y)
+			# Offset follows the forearm rest center and tucks the shoulder into the shirt.
+			p.x+=float(side)*lerpf(.012,.035,lower_weight)-float(side)*.065*torso_weight
+			vertices[i]=arm.transform*p
+			bones.append_array(PackedInt32Array([0,upper,upper+1,0]))
+			weights.append_array(PackedFloat32Array([torso_weight,(1.0-torso_weight)*(1.0-lower_weight),(1.0-torso_weight)*lower_weight,0.0]))
+		arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_BONES]=bones;arrays[Mesh.ARRAY_WEIGHTS]=weights
+		var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+		sleeve.mesh=mesh;sleeve.skin=rig.garment_skin;sleeve.skeleton=NodePath("../GarmentRig")
+		# Includes the complete walk/run/jump envelope, avoiding rest-pose culling.
+		sleeve.custom_aabb=AABB(Vector3(-.8,.4,-.65),Vector3(1.6,1.25,1.3))
 	return root

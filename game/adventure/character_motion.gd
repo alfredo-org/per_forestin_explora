@@ -17,6 +17,7 @@ func reset()->void:
 	model.position=Vector3.ZERO;model.rotation.x=0;model.rotation.z=0
 	for joint in joints:joint.rotation=Vector3.ZERO
 	smile=0.0;model.get_node("Head/Mouth").scale=Vector3.ONE
+	model.get_node("GarmentRig").sync_pose()
 func update(delta:float,speed:float,grounded:bool,vertical_speed:float,landing:float)->void:
 	clock+=delta
 	impact=maxf(landing,impact*exp(-delta*13))
@@ -60,3 +61,5 @@ func update(delta:float,speed:float,grounded:bool,vertical_speed:float,landing:f
 	if not grounded:target_smile=0.0
 	smile=lerpf(smile,target_smile,1-exp(-delta*6))
 	model.get_node("Head/Mouth").scale=Vector3(1.0+.08*smile,1.0+2.5*smile,1.0)
+
+	model.get_node("GarmentRig").sync_pose()
